@@ -66,21 +66,53 @@ namespace TwitterAway
         private void InitializeComponent()
         {
             this.mainMenu1 = new System.Windows.Forms.MainMenu();
+            this.menuMenuItem = new System.Windows.Forms.MenuItem();
+            this.pocketLadioSettingMenuItem = new System.Windows.Forms.MenuItem();
+            this.separateMenuItem1 = new System.Windows.Forms.MenuItem();
+            this.versionInfoMenuItem = new System.Windows.Forms.MenuItem();
+            this.separateMenuItem2 = new System.Windows.Forms.MenuItem();
+            this.exitMenuItem = new System.Windows.Forms.MenuItem();
             this.twitterListView = new System.Windows.Forms.ListView();
             this.screenNameColumnHeader = new System.Windows.Forms.ColumnHeader();
             this.doingColumnHeader = new System.Windows.Forms.ColumnHeader();
             this.doingTextBox = new System.Windows.Forms.TextBox();
             this.updateButton = new System.Windows.Forms.Button();
-            this.menuMenuItem = new System.Windows.Forms.MenuItem();
-            this.versionInfoMenuItem = new System.Windows.Forms.MenuItem();
-            this.separateMenuItem2 = new System.Windows.Forms.MenuItem();
-            this.exitMenuItem = new System.Windows.Forms.MenuItem();
-            this.pocketLadioSettingMenuItem = new System.Windows.Forms.MenuItem();
-            this.separateMenuItem1 = new System.Windows.Forms.MenuItem();
             // 
             // mainMenu1
             // 
             this.mainMenu1.MenuItems.Add(this.menuMenuItem);
+            // 
+            // menuMenuItem
+            // 
+            this.menuMenuItem.MenuItems.Add(this.pocketLadioSettingMenuItem);
+            this.menuMenuItem.MenuItems.Add(this.separateMenuItem1);
+            this.menuMenuItem.MenuItems.Add(this.versionInfoMenuItem);
+            this.menuMenuItem.MenuItems.Add(this.separateMenuItem2);
+            this.menuMenuItem.MenuItems.Add(this.exitMenuItem);
+            this.menuMenuItem.Text = "メニュー(&M)";
+            // 
+            // pocketLadioSettingMenuItem
+            // 
+            this.pocketLadioSettingMenuItem.Text = "TwitterAway設定(&T)";
+            this.pocketLadioSettingMenuItem.Click += new System.EventHandler(this.pocketLadioSettingMenuItem_Click);
+            // 
+            // separateMenuItem1
+            // 
+            this.separateMenuItem1.Text = "-";
+            // 
+            // versionInfoMenuItem
+            // 
+            this.versionInfoMenuItem.Text = "バージョン情報(&A)";
+            this.versionInfoMenuItem.Click += new System.EventHandler(this.versionInfoMenuItem_Click);
+            // 
+            // separateMenuItem2
+            // 
+            this.separateMenuItem2.Text = "-";
+            // 
+            // exitMenuItem
+            // 
+            this.exitMenuItem.Text = "終了(&X)";
+            this.exitMenuItem.Click += new System.EventHandler(this.exitMenuItem_Click);
             // 
             // twitterListView
             // 
@@ -112,38 +144,6 @@ namespace TwitterAway
             this.updateButton.Text = "Update";
             this.updateButton.Click += new System.EventHandler(this.updateButton_Click);
             // 
-            // menuMenuItem
-            // 
-            this.menuMenuItem.MenuItems.Add(this.pocketLadioSettingMenuItem);
-            this.menuMenuItem.MenuItems.Add(this.separateMenuItem1);
-            this.menuMenuItem.MenuItems.Add(this.versionInfoMenuItem);
-            this.menuMenuItem.MenuItems.Add(this.separateMenuItem2);
-            this.menuMenuItem.MenuItems.Add(this.exitMenuItem);
-            this.menuMenuItem.Text = "メニュー(&M)";
-            // 
-            // versionInfoMenuItem
-            // 
-            this.versionInfoMenuItem.Text = "バージョン情報(&A)";
-            this.versionInfoMenuItem.Click += new System.EventHandler(this.versionInfoMenuItem_Click);
-            // 
-            // separateMenuItem2
-            // 
-            this.separateMenuItem2.Text = "-";
-            // 
-            // exitMenuItem
-            // 
-            this.exitMenuItem.Text = "終了(&X)";
-            this.exitMenuItem.Click += new System.EventHandler(this.exitMenuItem_Click);
-            // 
-            // pocketLadioSettingMenuItem
-            // 
-            this.pocketLadioSettingMenuItem.Text = "TwitterAway設定(&T)";
-            this.pocketLadioSettingMenuItem.Click += new System.EventHandler(this.pocketLadioSettingMenuItem_Click);
-            // 
-            // separateMenuItem1
-            // 
-            this.separateMenuItem1.Text = "-";
-            // 
             // MainForm
             // 
             this.ClientSize = new System.Drawing.Size(240, 268);
@@ -151,7 +151,7 @@ namespace TwitterAway
             this.Controls.Add(this.doingTextBox);
             this.Controls.Add(this.twitterListView);
             this.Menu = this.mainMenu1;
-            this.Text = "TitterAway";
+            this.Text = "TwitterAway";
             this.Resize += new System.EventHandler(this.MainForm_Resize);
             this.Load += new System.EventHandler(this.MainForm_Load);
 
