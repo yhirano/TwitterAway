@@ -264,7 +264,10 @@ namespace TwitterAway.Twitter
             }
             finally
             {
-                st.Close();
+                if (st != null)
+                {
+                    st.Close();
+                }
             }
         }
     }
