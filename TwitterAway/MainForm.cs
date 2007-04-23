@@ -205,10 +205,20 @@ namespace TwitterAway
         /// </summary>
         private void FixWindowSize()
         {
+            // コントロールを一端消す
+            twitterListView.Visible = false;
+            doingTextBox.Visible = false;
+            updateButton.Visible = false;
+
             foreach (AnchorLayout anchorLayout in anchorControlList)
             {
                 anchorLayout.LayoutControl();
             }
+
+            // コントロールを出現させる
+            twitterListView.Visible = true;
+            doingTextBox.Visible = true;
+            updateButton.Visible = true;
         }
 
         private void updateButton_Click(object sender, EventArgs e)
@@ -223,7 +233,25 @@ namespace TwitterAway
             Twitter.Twitter twitterAccount = new TwitterAway.Twitter.Twitter(UserSetting.UserName, UserSetting.Password);
             if (doingTextBox.Text == string.Empty)
             {
-                UpdateTwitterListView(twitterAccount);
+                try
+                {
+                    UpdateTwitterListView(twitterAccount);
+                }
+                catch (WebException ex)
+                {
+                    if (ex.Status == WebExceptionStatus.ProtocolError)
+                    {
+                        MessageBox.Show("ステータスをアップデートできませんでした。Twitterのユーザー名とパスワードが間違っている可能性があります。");
+                    }
+                    else if (ex.Status == WebExceptionStatus.Timeout)
+                    {
+                        MessageBox.Show("ステータスをアップデートできませんでした。接続がタイムアウトしました。");
+                    }
+                    else
+                    {
+                        MessageBox.Show("ステータスをアップデートできませんでした。");
+                    }
+                }
             }
             else
             {
@@ -233,9 +261,20 @@ namespace TwitterAway
                     doingTextBox.Text = string.Empty;
                     UpdateTwitterListView(twitterAccount);
                 }
-                catch (WebException)
+                catch (WebException ex)
                 {
-                    MessageBox.Show("ステータスをアップデートできませんでした。Twitterのユーザー名とパスワードが間違っている可能性があります。");
+                    if (ex.Status == WebExceptionStatus.ProtocolError)
+                    {
+                        MessageBox.Show("ステータスをアップデートできませんでした。Twitterのユーザー名とパスワードが間違っている可能性があります。");
+                    }
+                    else if (ex.Status == WebExceptionStatus.Timeout)
+                    {
+                        MessageBox.Show("ステータスをアップデートできませんでした。接続がタイムアウトしました。");
+                    }
+                    else
+                    {
+                        MessageBox.Show("ステータスをアップデートできませんでした。");
+                    }
                 }
                 catch (UriFormatException)
                 {

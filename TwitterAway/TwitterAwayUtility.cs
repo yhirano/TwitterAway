@@ -26,7 +26,7 @@ namespace TwitterAway
         /// </summary>
         /// <param name="url">URL</param>
         /// <returns>Web上のストリーム</returns>
-        public static Stream GetWebStream(Uri url)
+        public static WebStream GetWebStream(Uri url)
         {
             return GetWebStream(url, string.Empty, string.Empty, string.Empty);
         }
@@ -37,7 +37,7 @@ namespace TwitterAway
         /// <param name="url">URL</param>
         /// <param name="requestMethod">HTTPリクエストメソッド</param>
         /// <returns>Web上のストリーム</returns>
-        public static Stream GetWebStream(Uri url, string requestMethod)
+        public static WebStream GetWebStream(Uri url, string requestMethod)
         {
             return GetWebStream(url, requestMethod, string.Empty, string.Empty);
         }
@@ -49,7 +49,7 @@ namespace TwitterAway
         /// <param name="userName">Web認証のユーザー名</param>
         /// <param name="password">Web認証のパスワード</param>
         /// <returns>Web上のストリーム</returns>
-        public static Stream GetWebStream(Uri url, string userName, string password)
+        public static WebStream GetWebStream(Uri url, string userName, string password)
         {
             return GetWebStream(url, string.Empty, userName, password);
         }
@@ -62,7 +62,7 @@ namespace TwitterAway
         /// <param name="userName">Web認証のユーザー名</param>
         /// <param name="password">Web認証のパスワード</param>
         /// <returns>Web上のストリーム</returns>
-        public static Stream GetWebStream(Uri url, string requestMethod, string userName, string password)
+        public static WebStream GetWebStream(Uri url, string requestMethod, string userName, string password)
         {
             WebStream ws;
             if (userName != null && userName != string.Empty)
@@ -97,9 +97,9 @@ namespace TwitterAway
             ws.UserAgent = TwitterAwayInfo.UserAgent;
             ws.AddHeader("X-Twitter-Client", TwitterAwayInfo.ApplicationName);
             ws.AddHeader("X-Twitter-Client-Version", TwitterAwayInfo.VersionNumber);
-            Stream st = ws.GetWebStream();
+            ws.CreateWebStream();
 
-            return st;
+            return ws;
         }
     }
 }

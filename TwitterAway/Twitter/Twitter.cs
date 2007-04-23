@@ -7,6 +7,7 @@ using System.Net.Sockets;
 using System.IO;
 using System.Xml;
 using System.Text;
+using MiscPocketCompactLibrary.Net;
 
 #endregion
 
@@ -50,12 +51,44 @@ namespace TwitterAway.Twitter
 
         public StatusInfomation[] PublicTimeline()
         {
-            return PaeseStatuses(TwitterAwayUtility.GetWebStream(new Uri(TwitterAwayInfo.TwitterPublicTimelineXml)));
+            WebStream st = null;
+            StatusInfomation[] statuses;
+
+            try
+            {
+                st = TwitterAwayUtility.GetWebStream(new Uri(TwitterAwayInfo.TwitterPublicTimelineXml));
+                statuses = PaeseStatuses(st);
+            }
+            finally
+            {
+                if (st != null)
+                {
+                    st.Close();
+                }
+            }
+
+            return statuses;
         }
 
         public StatusInfomation[] FriendTimeline()
         {
-            return PaeseStatuses(TwitterAwayUtility.GetWebStream(new Uri(TwitterAwayInfo.TwitterFriendsTimelineXml), userName, password));
+            WebStream st = null;
+            StatusInfomation[] statuses;
+
+            try
+            {
+                st = TwitterAwayUtility.GetWebStream(new Uri(TwitterAwayInfo.TwitterFriendsTimelineXml), userName, password);
+                statuses = PaeseStatuses(st);
+            }
+            finally
+            {
+                if (st != null)
+                {
+                    st.Close();
+                }
+            }
+
+            return statuses;
         }
 
         private StatusInfomation[] PaeseStatuses(Stream st)
@@ -192,10 +225,6 @@ namespace TwitterAway.Twitter
             }
             finally
             {
-                if (st != null)
-                {
-                    st.Close();
-                }
                 if (reader != null)
                 {
                     reader.Close();
@@ -218,10 +247,12 @@ namespace TwitterAway.Twitter
                 sendMessage += "%" + b.ToString("X2");
             }
 
+            WebStream st = null;
+
             try
             {
                 string send = TwitterAwayInfo.TwitterUpdateXml + "?status=" + sendMessage;
-                TwitterAwayUtility.GetWebStream(new Uri(send), "POST", userName, password);
+                st = TwitterAwayUtility.GetWebStream(new Uri(send), "POST", userName, password);
             }
             catch (WebException)
             {
@@ -230,6 +261,10 @@ namespace TwitterAway.Twitter
             catch (UriFormatException)
             {
                 throw;
+            }
+            finally
+            {
+                st.Close();
             }
         }
     }
