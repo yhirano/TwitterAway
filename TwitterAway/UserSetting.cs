@@ -127,6 +127,48 @@ namespace TwitterAway
         }
 
         /// <summary>
+        /// TwitterListViewのName欄の幅
+        /// </summary>
+        private static int twitterListViewNameColumnWidth=60;
+
+        /// <summary>
+        /// TwitterListViewのName欄の幅
+        /// </summary>
+        public static int TwitterListViewNameColumnWidth
+        {
+            get { return UserSetting.twitterListViewNameColumnWidth; }
+            set { UserSetting.twitterListViewNameColumnWidth = value; }
+        }
+
+        /// <summary>
+        /// TwitterListViewのDowing欄の幅
+        /// </summary>
+        private static int twitterListViewDoingColumnWidth=120;
+
+        /// <summary>
+        /// TwitterListViewのDowing欄の幅
+        /// </summary>
+        public static int TwitterListViewDoingColumnWidth
+        {
+            get { return UserSetting.twitterListViewDoingColumnWidth; }
+            set { UserSetting.twitterListViewDoingColumnWidth = value; }
+        }
+
+        /// <summary>
+        /// TwitterListViewのDate欄の幅
+        /// </summary>
+        private static int twitterListViewDateColumnWidth=50;
+
+        /// <summary>
+        /// TwitterListViewのDate欄の幅
+        /// </summary>
+        public static int TwitterListViewDateColumnWidth
+        {
+            get { return UserSetting.twitterListViewDateColumnWidth; }
+            set { UserSetting.twitterListViewDateColumnWidth = value; }
+        }
+
+        /// <summary>
         /// シングルトンのためプライベート
         /// </summary>
         private UserSetting()
@@ -152,7 +194,6 @@ namespace TwitterAway
                     {
                         if (reader.NodeType == XmlNodeType.Element)
                         {
-
                             if (reader.LocalName == "User")
                             {
                                 if (reader.MoveToFirstAttribute())
@@ -200,6 +241,63 @@ namespace TwitterAway
                                     }
                                 }
                             } // End of Proxy
+                            else if (reader.LocalName == "TwitterListViewColumnWidth")
+                            {
+                                if (reader.MoveToFirstAttribute())
+                                {
+                                    try
+                                    {
+                                        string nameWidth = reader.GetAttribute("name");
+                                        TwitterListViewNameColumnWidth = int.Parse(nameWidth);
+                                    }
+                                    catch (ArgumentException)
+                                    {
+                                        ;
+                                    }
+                                    catch (FormatException)
+                                    {
+                                        ;
+                                    }
+                                    catch (OverflowException)
+                                    {
+                                        ;
+                                    }
+                                    try
+                                    {
+                                        string dowingWidth = reader.GetAttribute("doing");
+                                        TwitterListViewDoingColumnWidth = int.Parse(dowingWidth);
+                                    }
+                                    catch (ArgumentException)
+                                    {
+                                        ;
+                                    }
+                                    catch (FormatException)
+                                    {
+                                        ;
+                                    }
+                                    catch (OverflowException)
+                                    {
+                                        ;
+                                    }
+                                    try
+                                    {
+                                        string dateWidth = reader.GetAttribute("date");
+                                        TwitterListViewDateColumnWidth = int.Parse(dateWidth);
+                                    }
+                                    catch (ArgumentException)
+                                    {
+                                        ;
+                                    }
+                                    catch (FormatException)
+                                    {
+                                        ;
+                                    }
+                                    catch (OverflowException)
+                                    {
+                                        ;
+                                    }
+                                }
+                            } // End of TwitterListViewColumnWidth
                         }
                     }
                 }
@@ -264,6 +362,12 @@ namespace TwitterAway
                 writer.WriteAttributeString("server", ProxyServer);
                 writer.WriteAttributeString("port", ProxyPort.ToString());
                 writer.WriteEndElement(); // End of Porxy
+
+                writer.WriteStartElement("TwitterListViewColumnWidth");
+                writer.WriteAttributeString("name", TwitterListViewNameColumnWidth.ToString());
+                writer.WriteAttributeString("doing", TwitterListViewDoingColumnWidth.ToString());
+                writer.WriteAttributeString("date", TwitterListViewDateColumnWidth.ToString());
+                writer.WriteEndElement(); // End of TwitterListViewColumnWidth
 
                 writer.WriteEndElement(); // End of Content.
 

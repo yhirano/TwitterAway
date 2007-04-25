@@ -7,6 +7,7 @@ using System.Windows.Forms;
 using System.Data;
 using System.IO;
 using System.Diagnostics;
+using MiscPocketCompactLibrary.Windows.Forms;
 
 #endregion
 
@@ -33,6 +34,22 @@ namespace TwitterAway
         private RadioButton proxyUnuseRadioButton;
         private Label proxyPortLabel;
         private Label proxyServerLabel;
+        private ContextMenu proxyPortContextMenu;
+        private MenuItem cutProxyPortMenuItem;
+        private MenuItem copyProxyPortMenuItem;
+        private MenuItem pasteProxyPortMenuItem;
+        private ContextMenu proxyServerContextMenu;
+        private MenuItem cutProxyServerMenuItem;
+        private MenuItem copyProxyServerMenuItem;
+        private MenuItem pasteProxyServerMenuItem;
+        private ContextMenu userNameContextMenu;
+        private MenuItem cutUserNamePathMenuItem;
+        private MenuItem copyUserNameMenuItem;
+        private MenuItem pasteUserNameMenuItem;
+        private ContextMenu passwordPathContextMenu;
+        private MenuItem cutPasswordPathMenuItem;
+        private MenuItem copyPasswordPathMenuItem;
+        private MenuItem pastePasswordPathMenuItem;
         /// <summary>
         /// フォームのメイン メニューです。
         /// </summary>
@@ -60,19 +77,35 @@ namespace TwitterAway
         private void InitializeComponent()
         {
             this.mainMenu = new System.Windows.Forms.MainMenu();
+            this.okMenuItem = new System.Windows.Forms.MenuItem();
             this.settingTabControl = new System.Windows.Forms.TabControl();
             this.settingTabPage = new System.Windows.Forms.TabPage();
-            this.userNameLabel = new System.Windows.Forms.Label();
-            this.userNameTextBox = new System.Windows.Forms.TextBox();
-            this.passwordLabel = new System.Windows.Forms.Label();
             this.passwordTextBox = new System.Windows.Forms.TextBox();
-            this.okMenuItem = new System.Windows.Forms.MenuItem();
+            this.passwordPathContextMenu = new System.Windows.Forms.ContextMenu();
+            this.cutPasswordPathMenuItem = new System.Windows.Forms.MenuItem();
+            this.copyPasswordPathMenuItem = new System.Windows.Forms.MenuItem();
+            this.pastePasswordPathMenuItem = new System.Windows.Forms.MenuItem();
+            this.passwordLabel = new System.Windows.Forms.Label();
+            this.userNameTextBox = new System.Windows.Forms.TextBox();
+            this.userNameContextMenu = new System.Windows.Forms.ContextMenu();
+            this.cutUserNamePathMenuItem = new System.Windows.Forms.MenuItem();
+            this.copyUserNameMenuItem = new System.Windows.Forms.MenuItem();
+            this.pasteUserNameMenuItem = new System.Windows.Forms.MenuItem();
+            this.userNameLabel = new System.Windows.Forms.Label();
             this.networkTabPage = new System.Windows.Forms.TabPage();
             this.proxySettingPanel = new System.Windows.Forms.Panel();
             this.proxyUseOriginalSettingRadioButton = new System.Windows.Forms.RadioButton();
             this.proxyPortTextBox = new System.Windows.Forms.TextBox();
+            this.proxyPortContextMenu = new System.Windows.Forms.ContextMenu();
+            this.cutProxyPortMenuItem = new System.Windows.Forms.MenuItem();
+            this.copyProxyPortMenuItem = new System.Windows.Forms.MenuItem();
+            this.pasteProxyPortMenuItem = new System.Windows.Forms.MenuItem();
             this.proxyUseOsSettingRadioButton = new System.Windows.Forms.RadioButton();
             this.proxyServerTextBox = new System.Windows.Forms.TextBox();
+            this.proxyServerContextMenu = new System.Windows.Forms.ContextMenu();
+            this.cutProxyServerMenuItem = new System.Windows.Forms.MenuItem();
+            this.copyProxyServerMenuItem = new System.Windows.Forms.MenuItem();
+            this.pasteProxyServerMenuItem = new System.Windows.Forms.MenuItem();
             this.proxyUnuseRadioButton = new System.Windows.Forms.RadioButton();
             this.proxyPortLabel = new System.Windows.Forms.Label();
             this.proxyServerLabel = new System.Windows.Forms.Label();
@@ -80,6 +113,11 @@ namespace TwitterAway
             // mainMenu
             // 
             this.mainMenu.MenuItems.Add(this.okMenuItem);
+            // 
+            // okMenuItem
+            // 
+            this.okMenuItem.Text = "&OK";
+            this.okMenuItem.Click += new System.EventHandler(this.okMenuItem_Click);
             // 
             // settingTabControl
             // 
@@ -99,16 +137,35 @@ namespace TwitterAway
             this.settingTabPage.Size = new System.Drawing.Size(240, 245);
             this.settingTabPage.Text = "基本";
             // 
-            // userNameLabel
+            // passwordTextBox
             // 
-            this.userNameLabel.Location = new System.Drawing.Point(3, 4);
-            this.userNameLabel.Size = new System.Drawing.Size(72, 20);
-            this.userNameLabel.Text = "ユーザー名";
+            this.passwordTextBox.ContextMenu = this.passwordPathContextMenu;
+            this.passwordTextBox.Location = new System.Drawing.Point(81, 31);
+            this.passwordTextBox.PasswordChar = '*';
+            this.passwordTextBox.Size = new System.Drawing.Size(156, 21);
+            this.passwordTextBox.KeyUp += new System.Windows.Forms.KeyEventHandler(this.passwordTextBox_KeyUp);
+            this.passwordTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.passwordTextBox_KeyDown);
             // 
-            // userNameTextBox
+            // passwordPathContextMenu
             // 
-            this.userNameTextBox.Location = new System.Drawing.Point(81, 4);
-            this.userNameTextBox.Size = new System.Drawing.Size(156, 21);
+            this.passwordPathContextMenu.MenuItems.Add(this.cutPasswordPathMenuItem);
+            this.passwordPathContextMenu.MenuItems.Add(this.copyPasswordPathMenuItem);
+            this.passwordPathContextMenu.MenuItems.Add(this.pastePasswordPathMenuItem);
+            // 
+            // cutPasswordPathMenuItem
+            // 
+            this.cutPasswordPathMenuItem.Text = "切り取り(&T)";
+            this.cutPasswordPathMenuItem.Click += new System.EventHandler(this.CutPasswordPathMenuItem_Click);
+            // 
+            // copyPasswordPathMenuItem
+            // 
+            this.copyPasswordPathMenuItem.Text = "コピー(&C)";
+            this.copyPasswordPathMenuItem.Click += new System.EventHandler(this.CopyPasswordPathMenuItem_Click);
+            // 
+            // pastePasswordPathMenuItem
+            // 
+            this.pastePasswordPathMenuItem.Text = "貼り付け(&P)";
+            this.pastePasswordPathMenuItem.Click += new System.EventHandler(this.PastePasswordPathMenuItem_Click);
             // 
             // passwordLabel
             // 
@@ -116,22 +173,46 @@ namespace TwitterAway
             this.passwordLabel.Size = new System.Drawing.Size(72, 20);
             this.passwordLabel.Text = "パスワード";
             // 
-            // passwordTextBox
+            // userNameTextBox
             // 
-            this.passwordTextBox.Location = new System.Drawing.Point(81, 31);
-            this.passwordTextBox.PasswordChar = '*';
-            this.passwordTextBox.Size = new System.Drawing.Size(156, 21);
+            this.userNameTextBox.ContextMenu = this.userNameContextMenu;
+            this.userNameTextBox.Location = new System.Drawing.Point(81, 4);
+            this.userNameTextBox.Size = new System.Drawing.Size(156, 21);
+            this.userNameTextBox.KeyUp += new System.Windows.Forms.KeyEventHandler(this.userNameTextBox_KeyUp);
+            this.userNameTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.userNameTextBox_KeyDown);
             // 
-            // okMenuItem
+            // userNameContextMenu
             // 
-            this.okMenuItem.Text = "&OK";
-            this.okMenuItem.Click += new System.EventHandler(this.okMenuItem_Click);
+            this.userNameContextMenu.MenuItems.Add(this.cutUserNamePathMenuItem);
+            this.userNameContextMenu.MenuItems.Add(this.copyUserNameMenuItem);
+            this.userNameContextMenu.MenuItems.Add(this.pasteUserNameMenuItem);
+            // 
+            // cutUserNamePathMenuItem
+            // 
+            this.cutUserNamePathMenuItem.Text = "切り取り(&T)";
+            this.cutUserNamePathMenuItem.Click += new System.EventHandler(this.CutUserNameMenuItem_Click);
+            // 
+            // copyUserNameMenuItem
+            // 
+            this.copyUserNameMenuItem.Text = "コピー(&C)";
+            this.copyUserNameMenuItem.Click += new System.EventHandler(this.CopyUserNameMenuItem_Click);
+            // 
+            // pasteUserNameMenuItem
+            // 
+            this.pasteUserNameMenuItem.Text = "貼り付け(&P)";
+            this.pasteUserNameMenuItem.Click += new System.EventHandler(this.PasteUserNameMenuItem_Click);
+            // 
+            // userNameLabel
+            // 
+            this.userNameLabel.Location = new System.Drawing.Point(3, 4);
+            this.userNameLabel.Size = new System.Drawing.Size(72, 20);
+            this.userNameLabel.Text = "ユーザー名";
             // 
             // networkTabPage
             // 
             this.networkTabPage.Controls.Add(this.proxySettingPanel);
             this.networkTabPage.Location = new System.Drawing.Point(0, 0);
-            this.networkTabPage.Size = new System.Drawing.Size(240, 245);
+            this.networkTabPage.Size = new System.Drawing.Size(232, 242);
             this.networkTabPage.Text = "ネットワーク";
             // 
             // proxySettingPanel
@@ -154,8 +235,32 @@ namespace TwitterAway
             // 
             // proxyPortTextBox
             // 
+            this.proxyPortTextBox.ContextMenu = this.proxyPortContextMenu;
             this.proxyPortTextBox.Location = new System.Drawing.Point(3, 140);
             this.proxyPortTextBox.Size = new System.Drawing.Size(74, 21);
+            this.proxyPortTextBox.KeyUp += new System.Windows.Forms.KeyEventHandler(this.ProxyPortTextBox_KeyUp);
+            this.proxyPortTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.ProxyPortTextBox_KeyDown);
+            // 
+            // proxyPortContextMenu
+            // 
+            this.proxyPortContextMenu.MenuItems.Add(this.cutProxyPortMenuItem);
+            this.proxyPortContextMenu.MenuItems.Add(this.copyProxyPortMenuItem);
+            this.proxyPortContextMenu.MenuItems.Add(this.pasteProxyPortMenuItem);
+            // 
+            // cutProxyPortMenuItem
+            // 
+            this.cutProxyPortMenuItem.Text = "切り取り(&T)";
+            this.cutProxyPortMenuItem.Click += new System.EventHandler(this.CutProxyPortMenuItem_Click);
+            // 
+            // copyProxyPortMenuItem
+            // 
+            this.copyProxyPortMenuItem.Text = "コピー(&C)";
+            this.copyProxyPortMenuItem.Click += new System.EventHandler(this.CopyProxyPortMenuItem_Click);
+            // 
+            // pasteProxyPortMenuItem
+            // 
+            this.pasteProxyPortMenuItem.Text = "貼り付け(&P)";
+            this.pasteProxyPortMenuItem.Click += new System.EventHandler(this.PasteProxyPortMenuItem_Click);
             // 
             // proxyUseOsSettingRadioButton
             // 
@@ -166,8 +271,32 @@ namespace TwitterAway
             // 
             // proxyServerTextBox
             // 
+            this.proxyServerTextBox.ContextMenu = this.proxyServerContextMenu;
             this.proxyServerTextBox.Location = new System.Drawing.Point(3, 97);
             this.proxyServerTextBox.Size = new System.Drawing.Size(234, 21);
+            this.proxyServerTextBox.KeyUp += new System.Windows.Forms.KeyEventHandler(this.ProxyServerTextBox_KeyUp);
+            this.proxyServerTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.ProxyServerTextBox_KeyDown);
+            // 
+            // proxyServerContextMenu
+            // 
+            this.proxyServerContextMenu.MenuItems.Add(this.cutProxyServerMenuItem);
+            this.proxyServerContextMenu.MenuItems.Add(this.copyProxyServerMenuItem);
+            this.proxyServerContextMenu.MenuItems.Add(this.pasteProxyServerMenuItem);
+            // 
+            // cutProxyServerMenuItem
+            // 
+            this.cutProxyServerMenuItem.Text = "切り取り(&T)";
+            this.cutProxyServerMenuItem.Click += new System.EventHandler(this.CutProxyServerMenuItem_Click);
+            // 
+            // copyProxyServerMenuItem
+            // 
+            this.copyProxyServerMenuItem.Text = "コピー(&C)";
+            this.copyProxyServerMenuItem.Click += new System.EventHandler(this.CopyProxyServerMenuItem_Click);
+            // 
+            // pasteProxyServerMenuItem
+            // 
+            this.pasteProxyServerMenuItem.Text = "貼り付け(&P)";
+            this.pasteProxyServerMenuItem.Click += new System.EventHandler(this.PasteProxyServerMenuItem_Click);
             // 
             // proxyUnuseRadioButton
             // 
@@ -292,24 +421,156 @@ namespace TwitterAway
             this.Close();
         }
 
-        private void ProxyPortTextBox_KeyUp(object sender, KeyEventArgs e)
+        private void CutProxyServerMenuItem_Click(object sender, EventArgs e)
         {
-
+            ClipboardTextBox.Cut(proxyServerTextBox);
         }
 
-        private void ProxyPortTextBox_KeyDown(object sender, KeyEventArgs e)
+        private void CopyProxyServerMenuItem_Click(object sender, EventArgs e)
         {
-
+            ClipboardTextBox.Copy(proxyServerTextBox);
         }
 
-        private void ProxyServerTextBox_KeyUp(object sender, KeyEventArgs e)
+        private void PasteProxyServerMenuItem_Click(object sender, EventArgs e)
         {
+            ClipboardTextBox.Paste(proxyServerTextBox);
+        }
 
+        private void CutProxyPortMenuItem_Click(object sender, EventArgs e)
+        {
+            ClipboardTextBox.Cut(proxyPortTextBox);
+        }
+
+        private void CopyProxyPortMenuItem_Click(object sender, EventArgs e)
+        {
+            ClipboardTextBox.Copy(proxyPortTextBox);
+        }
+
+        private void PasteProxyPortMenuItem_Click(object sender, EventArgs e)
+        {
+            ClipboardTextBox.Paste(proxyPortTextBox);
         }
 
         private void ProxyServerTextBox_KeyDown(object sender, KeyEventArgs e)
         {
+            // 切り取りショートカット
+            if (e.KeyCode == Keys.X && e.Control)
+            {
+                ClipboardTextBox.Cut(proxyServerTextBox);
+            }
+            // 貼り付けショートカット
+            else if (e.KeyCode == Keys.V && e.Control)
+            {
+                ClipboardTextBox.Paste(proxyServerTextBox);
+            }
+        }
 
+        private void ProxyServerTextBox_KeyUp(object sender, KeyEventArgs e)
+        {
+            // コピーショートカット
+            if (e.KeyCode == Keys.C && e.Control)
+            {
+                ClipboardTextBox.Copy(proxyServerTextBox);
+            }
+        }
+
+        private void ProxyPortTextBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            // 切り取りショートカット
+            if (e.KeyCode == Keys.X && e.Control)
+            {
+                ClipboardTextBox.Cut(proxyPortTextBox);
+            }
+            // 貼り付けショートカット
+            else if (e.KeyCode == Keys.V && e.Control)
+            {
+                ClipboardTextBox.Paste(proxyPortTextBox);
+            }
+        }
+
+        private void ProxyPortTextBox_KeyUp(object sender, KeyEventArgs e)
+        {
+            // コピーショートカット
+            if (e.KeyCode == Keys.C && e.Control)
+            {
+                ClipboardTextBox.Copy(proxyPortTextBox);
+            }
+        }
+
+        private void CutUserNameMenuItem_Click(object sender, EventArgs e)
+        {
+            ClipboardTextBox.Cut(userNameTextBox);
+        }
+
+        private void CopyUserNameMenuItem_Click(object sender, EventArgs e)
+        {
+            ClipboardTextBox.Copy(userNameTextBox);
+        }
+
+        private void PasteUserNameMenuItem_Click(object sender, EventArgs e)
+        {
+            ClipboardTextBox.Paste(userNameTextBox);
+        }
+
+        private void CutPasswordPathMenuItem_Click(object sender, EventArgs e)
+        {
+            ClipboardTextBox.Cut(passwordTextBox);
+        }
+
+        private void CopyPasswordPathMenuItem_Click(object sender, EventArgs e)
+        {
+            ClipboardTextBox.Copy(passwordTextBox);
+        }
+
+        private void PastePasswordPathMenuItem_Click(object sender, EventArgs e)
+        {
+            ClipboardTextBox.Cut(passwordTextBox);
+        }
+
+        private void userNameTextBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            // 切り取りショートカット
+            if (e.KeyCode == Keys.X && e.Control)
+            {
+                ClipboardTextBox.Cut(userNameTextBox);
+            }
+            // 貼り付けショートカット
+            else if (e.KeyCode == Keys.V && e.Control)
+            {
+                ClipboardTextBox.Paste(userNameTextBox);
+            }
+        }
+
+        private void userNameTextBox_KeyUp(object sender, KeyEventArgs e)
+        {
+            // コピーショートカット
+            if (e.KeyCode == Keys.C && e.Control)
+            {
+                ClipboardTextBox.Copy(userNameTextBox);
+            }
+        }
+
+        private void passwordTextBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            // 切り取りショートカット
+            if (e.KeyCode == Keys.X && e.Control)
+            {
+                ClipboardTextBox.Cut(passwordTextBox);
+            }
+            // 貼り付けショートカット
+            else if (e.KeyCode == Keys.V && e.Control)
+            {
+                ClipboardTextBox.Paste(passwordTextBox);
+            }
+        }
+
+        private void passwordTextBox_KeyUp(object sender, KeyEventArgs e)
+        {
+            // コピーショートカット
+            if (e.KeyCode == Keys.C && e.Control)
+            {
+                ClipboardTextBox.Copy(passwordTextBox);
+            }
         }
     }
 }

@@ -38,7 +38,13 @@ namespace TwitterAway
         /// <summary>
         /// フォームのメイン メニュー
         /// </summary>
-        private System.Windows.Forms.MainMenu mainMenu1;
+        private System.Windows.Forms.MainMenu mainMenu;
+        private Microsoft.WindowsCE.Forms.InputPanel inputPanel;
+        private ColumnHeader dateColumnHeader;
+        private ContextMenu doingContextMenu;
+        private MenuItem cutDoingMenuItem;
+        private MenuItem copyDoingMenuItem;
+        private MenuItem pasteDoingMenuItem;
 
         /// <summary>
         /// アンカーコントロールのリスト
@@ -65,7 +71,7 @@ namespace TwitterAway
         /// </summary>
         private void InitializeComponent()
         {
-            this.mainMenu1 = new System.Windows.Forms.MainMenu();
+            this.mainMenu = new System.Windows.Forms.MainMenu();
             this.menuMenuItem = new System.Windows.Forms.MenuItem();
             this.pocketLadioSettingMenuItem = new System.Windows.Forms.MenuItem();
             this.separateMenuItem1 = new System.Windows.Forms.MenuItem();
@@ -75,12 +81,18 @@ namespace TwitterAway
             this.twitterListView = new System.Windows.Forms.ListView();
             this.screenNameColumnHeader = new System.Windows.Forms.ColumnHeader();
             this.doingColumnHeader = new System.Windows.Forms.ColumnHeader();
+            this.dateColumnHeader = new System.Windows.Forms.ColumnHeader();
             this.doingTextBox = new System.Windows.Forms.TextBox();
+            this.doingContextMenu = new System.Windows.Forms.ContextMenu();
+            this.cutDoingMenuItem = new System.Windows.Forms.MenuItem();
+            this.copyDoingMenuItem = new System.Windows.Forms.MenuItem();
+            this.pasteDoingMenuItem = new System.Windows.Forms.MenuItem();
             this.updateButton = new System.Windows.Forms.Button();
+            this.inputPanel = new Microsoft.WindowsCE.Forms.InputPanel();
             // 
-            // mainMenu1
+            // mainMenu
             // 
-            this.mainMenu1.MenuItems.Add(this.menuMenuItem);
+            this.mainMenu.MenuItems.Add(this.menuMenuItem);
             // 
             // menuMenuItem
             // 
@@ -118,6 +130,7 @@ namespace TwitterAway
             // 
             this.twitterListView.Columns.Add(this.screenNameColumnHeader);
             this.twitterListView.Columns.Add(this.doingColumnHeader);
+            this.twitterListView.Columns.Add(this.dateColumnHeader);
             this.twitterListView.Location = new System.Drawing.Point(3, 3);
             this.twitterListView.Size = new System.Drawing.Size(234, 235);
             this.twitterListView.View = System.Windows.Forms.View.Details;
@@ -130,12 +143,42 @@ namespace TwitterAway
             // doingColumnHeader
             // 
             this.doingColumnHeader.Text = "What are you doing?";
-            this.doingColumnHeader.Width = 149;
+            this.doingColumnHeader.Width = 120;
+            // 
+            // dateColumnHeader
+            // 
+            this.dateColumnHeader.Text = "Date";
+            this.dateColumnHeader.Width = 50;
             // 
             // doingTextBox
             // 
+            this.doingTextBox.ContextMenu = this.doingContextMenu;
             this.doingTextBox.Location = new System.Drawing.Point(3, 244);
             this.doingTextBox.Size = new System.Drawing.Size(164, 21);
+            this.doingTextBox.KeyUp += new System.Windows.Forms.KeyEventHandler(this.doingTextBox_KeyUp);
+            this.doingTextBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.doingTextBox_KeyPress);
+            this.doingTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.doingTextBox_KeyDown);
+            // 
+            // doingContextMenu
+            // 
+            this.doingContextMenu.MenuItems.Add(this.cutDoingMenuItem);
+            this.doingContextMenu.MenuItems.Add(this.copyDoingMenuItem);
+            this.doingContextMenu.MenuItems.Add(this.pasteDoingMenuItem);
+            // 
+            // cutDoingMenuItem
+            // 
+            this.cutDoingMenuItem.Text = "切り取り(&T)";
+            this.cutDoingMenuItem.Click += new System.EventHandler(this.cutDoingMenuItem_Click);
+            // 
+            // copyDoingMenuItem
+            // 
+            this.copyDoingMenuItem.Text = "コピー(&C)";
+            this.copyDoingMenuItem.Click += new System.EventHandler(this.copyDoingMenuItem_Click);
+            // 
+            // pasteDoingMenuItem
+            // 
+            this.pasteDoingMenuItem.Text = "貼り付け(&P)";
+            this.pasteDoingMenuItem.Click += new System.EventHandler(this.pasteDoingMenuItem_Click);
             // 
             // updateButton
             // 
@@ -144,15 +187,20 @@ namespace TwitterAway
             this.updateButton.Text = "Update";
             this.updateButton.Click += new System.EventHandler(this.updateButton_Click);
             // 
+            // inputPanel
+            // 
+            this.inputPanel.EnabledChanged += new System.EventHandler(this.inputPanel_EnabledChanged);
+            // 
             // MainForm
             // 
             this.ClientSize = new System.Drawing.Size(240, 268);
             this.Controls.Add(this.updateButton);
             this.Controls.Add(this.doingTextBox);
             this.Controls.Add(this.twitterListView);
-            this.Menu = this.mainMenu1;
+            this.Menu = this.mainMenu;
             this.Text = "TwitterAway";
             this.Resize += new System.EventHandler(this.MainForm_Resize);
+            this.Closing += new System.ComponentModel.CancelEventHandler(this.MainForm_Closing);
             this.Load += new System.EventHandler(this.MainForm_Load);
 
         }
@@ -221,6 +269,29 @@ namespace TwitterAway
             updateButton.Visible = true;
         }
 
+        /// <summary>
+        /// フォームのサイズ変更時にフォーム内の中身のサイズを適正に変更する
+        /// </summary>
+        /// <param name="parentControlWidth">レイアウトし直す親コントロールの領域の横幅</param>
+        /// <param name="parentControlHeight">レイアウトし直す親コントロールの領域の高さ</param>
+        private void FixWindowSize(int parentControlWidth, int parentControlHeight)
+        {
+            // コントロールを一端消す
+            twitterListView.Visible = false;
+            doingTextBox.Visible = false;
+            updateButton.Visible = false;
+
+            foreach (AnchorLayout anchorLayout in anchorControlList)
+            {
+                anchorLayout.LayoutControl(parentControlWidth, parentControlHeight);
+            }
+
+            // コントロールを出現させる
+            twitterListView.Visible = true;
+            doingTextBox.Visible = true;
+            updateButton.Visible = true;
+        }
+
         private void updateButton_Click(object sender, EventArgs e)
         {
             #region UI前処理
@@ -269,16 +340,16 @@ namespace TwitterAway
                     }
                     else if (ex.Status == WebExceptionStatus.Timeout)
                     {
-                        MessageBox.Show("ステータスをアップデートできませんでした。接続がタイムアウトしました。");
+                        MessageBox.Show("ステータスをアップデートできませんでした。接続がタイムアウトしました。", "警告");
                     }
                     else
                     {
-                        MessageBox.Show("ステータスをアップデートできませんでした。");
+                        MessageBox.Show("ステータスをアップデートできませんでした。", "警告");
                     }
                 }
                 catch (UriFormatException)
                 {
-                    MessageBox.Show("ステータスをアップデートできませんでした。ステータスが長すぎる可能性があります。");
+                    MessageBox.Show("ステータスをアップデートできませんでした。ステータスが長すぎる可能性があります。", "警告");
                 }
             }
 
@@ -298,11 +369,26 @@ namespace TwitterAway
             Twitter.StatusInfomation[] sts = twitterAccount.FriendTimeline();
             foreach (Twitter.StatusInfomation s in sts)
             {
-                string[] str = { s.User.ScreenName, s.Text };
+                string date = string.Empty;
+                if (DateTime.Today <= s.CreatedAt)
+                {
+                    date = s.CreatedAt.ToString("HH':'mm");
+                }
+                else
+                {
+                    date = s.CreatedAt.ToString("M'/'d");
+                }
+
+                string[] str = { s.User.ScreenName, s.Text, date };
                 twitterListView.Items.Add(new ListViewItem(str));
             }
 
             twitterListView.EndUpdate();
+
+            if (sts.Length == 0)
+            {
+                MessageBox.Show("ステータスがありません。", "情報");
+            }
         }
 
         private void MainForm_Load(object sender, EventArgs e)
@@ -338,6 +424,10 @@ namespace TwitterAway
                 MessageBox.Show("設定ファイルが読み込めませんでした", "設定ファイルの読み込みエラー");
             }
 
+            twitterListView.Columns[0].Width = UserSetting.TwitterListViewNameColumnWidth;
+            twitterListView.Columns[1].Width = UserSetting.TwitterListViewDoingColumnWidth;
+            twitterListView.Columns[2].Width = UserSetting.TwitterListViewDateColumnWidth;
+
             SetAnchorControl();
             FixWindowSize();
         }
@@ -364,6 +454,81 @@ namespace TwitterAway
         private void MainForm_Resize(object sender, EventArgs e)
         {
             FixWindowSize();
+        }
+
+        private void inputPanel_EnabledChanged(object sender, EventArgs e)
+        {
+            // SPIの表示後は、SIPが返すデスクトップ領域のサイズを元にコントロールのレイアウトを変更し、
+            // SIPの消去後は、親コントロール（MainFormのこと）のサイズを元にコントロールをレイアウトを変更する。
+            // SIPの消去後にSIPが返すデスクトップ領域のサイズが、実際のサイズよりも縦に大きいことがあったため、
+            // SIPの消去後は、親コントロールのサイズを元にレイアウトした。
+            if (inputPanel.Enabled == true)
+            {
+                FixWindowSize(inputPanel.VisibleDesktop.Width, inputPanel.VisibleDesktop.Height);
+            }
+            else
+            {
+                FixWindowSize();
+            }
+        }
+
+        private void cutDoingMenuItem_Click(object sender, EventArgs e)
+        {
+            ClipboardTextBox.Cut(doingTextBox);
+        }
+
+        private void copyDoingMenuItem_Click(object sender, EventArgs e)
+        {
+            ClipboardTextBox.Copy(doingTextBox);
+        }
+
+        private void pasteDoingMenuItem_Click(object sender, EventArgs e)
+        {
+            ClipboardTextBox.Paste(doingTextBox);
+        }
+
+        private void doingTextBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            // 入力ボタンを押したとき
+            if (e.KeyCode == Keys.Enter)
+            {
+                updateButton_Click(sender, e);
+            }
+            // 切り取りショートカット
+            else if (e.KeyCode == Keys.X && e.Control)
+            {
+                ClipboardTextBox.Cut(doingTextBox);
+            }
+            // 貼り付けショートカット
+            else if (e.KeyCode == Keys.V && e.Control)
+            {
+                ClipboardTextBox.Paste(doingTextBox);
+            }
+        }
+
+        private void doingTextBox_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            // 入力ボタンを押したときの音を消すため
+            if (e.KeyChar == (char)Keys.Enter)
+            {
+                e.Handled = true;
+            }
+        }
+
+        private void doingTextBox_KeyUp(object sender, KeyEventArgs e)
+        {
+            // コピーショートカット
+            if (e.KeyCode == Keys.C && e.Control)
+            {
+                ClipboardTextBox.Copy(doingTextBox);
+            }
+        }
+
+        private void MainForm_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            UserSetting.TwitterListViewNameColumnWidth = twitterListView.Columns[0].Width;
+            UserSetting.TwitterListViewDoingColumnWidth = twitterListView.Columns[1].Width;
+            UserSetting.TwitterListViewDateColumnWidth = twitterListView.Columns[2].Width;
         }
     }
 }
