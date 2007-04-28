@@ -29,7 +29,7 @@ namespace TwitterAway
         /// <summary>
         /// アプリケーションのバージョン
         /// </summary>
-        private const string VERSION_NUMBER = "0.2";
+        private const string VERSION_NUMBER = "0.4 (Test Release 1)";
 
         /// <summary>
         /// アプリケーションのバージョン
@@ -55,6 +55,32 @@ namespace TwitterAway
         #endregion
 
         #region アプリケーションの設定
+
+        /// <summary>
+        /// アップデートタイマーの上限
+        /// </summary>
+        private const int UPDATE_TIMER_MAXIMUM_MILL_SEC = 600000;
+
+        /// <summary>
+        /// アップデートタイマーの上限
+        /// </summary>
+        public static int UpdateTimerMaximumMillSec
+        {
+            get { return UPDATE_TIMER_MAXIMUM_MILL_SEC; }
+        }
+
+        /// <summary>
+        /// アップデートタイマーの下限 
+        /// </summary>
+        private const int UPDATE_TIMER_MINIMUM_MILL_SEC = 15000;
+
+        /// <summary>
+        /// アップデートタイマーの下限 
+        /// </summary>
+        public static int UpdateTimerMinimumMillSec
+        {
+            get { return UPDATE_TIMER_MINIMUM_MILL_SEC; }
+        }
 
         /// <summary>
         /// Web接続時のタイムアウト時間

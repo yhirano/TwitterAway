@@ -50,6 +50,8 @@ namespace TwitterAway
         private MenuItem cutPasswordPathMenuItem;
         private MenuItem copyPasswordPathMenuItem;
         private MenuItem pastePasswordPathMenuItem;
+        private NumericUpDown updateTimerSecondNumericUpDown;
+        private Label updateTimerSecondLabel;
         /// <summary>
         /// フォームのメイン メニューです。
         /// </summary>
@@ -109,6 +111,8 @@ namespace TwitterAway
             this.proxyUnuseRadioButton = new System.Windows.Forms.RadioButton();
             this.proxyPortLabel = new System.Windows.Forms.Label();
             this.proxyServerLabel = new System.Windows.Forms.Label();
+            this.updateTimerSecondNumericUpDown = new System.Windows.Forms.NumericUpDown();
+            this.updateTimerSecondLabel = new System.Windows.Forms.Label();
             // 
             // mainMenu
             // 
@@ -129,6 +133,8 @@ namespace TwitterAway
             // 
             // settingTabPage
             // 
+            this.settingTabPage.Controls.Add(this.updateTimerSecondNumericUpDown);
+            this.settingTabPage.Controls.Add(this.updateTimerSecondLabel);
             this.settingTabPage.Controls.Add(this.passwordTextBox);
             this.settingTabPage.Controls.Add(this.passwordLabel);
             this.settingTabPage.Controls.Add(this.userNameTextBox);
@@ -316,6 +322,23 @@ namespace TwitterAway
             this.proxyServerLabel.Size = new System.Drawing.Size(234, 16);
             this.proxyServerLabel.Text = "プロキシサーバ （例：proxy.example.com）";
             // 
+            // updateTimerSecondNumericUpDown
+            // 
+            this.updateTimerSecondNumericUpDown.Location = new System.Drawing.Point(182, 93);
+            this.updateTimerSecondNumericUpDown.ReadOnly = true;
+            this.updateTimerSecondNumericUpDown.Size = new System.Drawing.Size(55, 22);
+            this.updateTimerSecondNumericUpDown.Value = new decimal(new int[] {
+            60,
+            0,
+            0,
+            0});
+            // 
+            // updateTimerSecondLabel
+            // 
+            this.updateTimerSecondLabel.Location = new System.Drawing.Point(3, 70);
+            this.updateTimerSecondLabel.Size = new System.Drawing.Size(234, 20);
+            this.updateTimerSecondLabel.Text = "Twitterの自動アップデート間隔(秒)";
+            // 
             // SettingForm
             // 
             this.ClientSize = new System.Drawing.Size(240, 268);
@@ -331,45 +354,69 @@ namespace TwitterAway
 
         private void SettingForm_Load(object sender, EventArgs e)
         {
-            // 設定の読み込み
+            // ヘッドラインチェックタイマーの上限と下限
+            updateTimerSecondNumericUpDown.Minimum = TwitterAwayInfo.UpdateTimerMinimumMillSec / 1000;
+            updateTimerSecondNumericUpDown.Maximum = TwitterAwayInfo.UpdateTimerMaximumMillSec / 1000;
+
+            #region 設定の読み込み
+
+            userNameTextBox.Text = UserSetting.UserName;
+            passwordTextBox.Text = UserSetting.Password;
+            updateTimerSecondNumericUpDown.Text = (UserSetting.UpdateTimerMillSecond / 1000).ToString();
+
+            if (UserSetting.ProxyUse == UserSetting.ProxyConnect.Unuse)
             {
-                userNameTextBox.Text = UserSetting.UserName;
-                passwordTextBox.Text = UserSetting.Password;
-
-                if (UserSetting.ProxyUse == UserSetting.ProxyConnect.Unuse)
-                {
-                    proxyUnuseRadioButton.Checked = true;
-                    proxyUseOsSettingRadioButton.Checked = false;
-                    proxyUseOriginalSettingRadioButton.Checked = false;
-                }
-                else if (UserSetting.ProxyUse == UserSetting.ProxyConnect.OsSetting)
-                {
-                    proxyUnuseRadioButton.Checked = false;
-                    proxyUseOsSettingRadioButton.Checked = true;
-                    proxyUseOriginalSettingRadioButton.Checked = false;
-                }
-                else if (UserSetting.ProxyUse == UserSetting.ProxyConnect.OriginalSetting)
-                {
-                    proxyUnuseRadioButton.Checked = false;
-                    proxyUseOsSettingRadioButton.Checked = false;
-                    proxyUseOriginalSettingRadioButton.Checked = true;
-                }
-                else
-                {
-                    // ここに到達することはあり得ない
-                    Trace.Assert(false, "想定外の動作のため、終了します");
-                }
-
-                proxyServerTextBox.Text = UserSetting.ProxyServer;
-                proxyPortTextBox.Text = UserSetting.ProxyPort.ToString();
+                proxyUnuseRadioButton.Checked = true;
+                proxyUseOsSettingRadioButton.Checked = false;
+                proxyUseOriginalSettingRadioButton.Checked = false;
             }
+            else if (UserSetting.ProxyUse == UserSetting.ProxyConnect.OsSetting)
+            {
+                proxyUnuseRadioButton.Checked = false;
+                proxyUseOsSettingRadioButton.Checked = true;
+                proxyUseOriginalSettingRadioButton.Checked = false;
+            }
+            else if (UserSetting.ProxyUse == UserSetting.ProxyConnect.OriginalSetting)
+            {
+                proxyUnuseRadioButton.Checked = false;
+                proxyUseOsSettingRadioButton.Checked = false;
+                proxyUseOriginalSettingRadioButton.Checked = true;
+            }
+            else
+            {
+                // ここに到達することはあり得ない
+                Trace.Assert(false, "想定外の動作のため、終了します");
+            }
+
+            proxyServerTextBox.Text = UserSetting.ProxyServer;
+            proxyPortTextBox.Text = UserSetting.ProxyPort.ToString();
+            
+            #endregion
         }
 
         private void SettingForm_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            // 設定の書き込み
+            #region 設定の書き込み
+
             UserSetting.UserName = userNameTextBox.Text;
             UserSetting.Password = passwordTextBox.Text;
+
+            try
+            {
+                UserSetting.UpdateTimerMillSecond = Convert.ToInt32(updateTimerSecondNumericUpDown.Text) * 1000;
+            }
+            catch (ArgumentException)
+            {
+                ;
+            }
+            catch (FormatException)
+            {
+                ;
+            }
+            catch (OverflowException)
+            {
+                ;
+            }
 
             if (proxyUnuseRadioButton.Checked == true)
             {
@@ -414,6 +461,8 @@ namespace TwitterAway
             {
                 MessageBox.Show("設定ファイルが書き込めませんでした", "設定ファイル書き込みエラー");
             }
+
+            #endregion
         }
 
         private void okMenuItem_Click(object sender, EventArgs e)

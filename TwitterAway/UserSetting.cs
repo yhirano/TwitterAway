@@ -43,6 +43,50 @@ namespace TwitterAway
             set { password = value; }
         }
 
+        /// <summary>
+        /// タイマーでチェックするか
+        /// </summary>
+        private static bool updateTimerCheck;
+
+        /// <summary>
+        /// タイマーでチェックするか
+        /// </summary>
+        public static bool UpdateTimerCheck
+        {
+            get { return updateTimerCheck; }
+            set { updateTimerCheck = value; }
+        }
+
+        /// <summary>
+        /// タイマーのチェック時間
+        /// </summary>
+        private static int updateTimerMillSecond = 60000;
+
+        /// <summary>
+        /// タイマーのチェック時間
+        /// </summary>
+        public static int UpdateTimerMillSecond
+        {
+            get { return updateTimerMillSecond; }
+            set
+            {
+                // 規定に収まる場合
+                if (TwitterAwayInfo.UpdateTimerMinimumMillSec <= value && value <= TwitterAwayInfo.UpdateTimerMaximumMillSec)
+                {
+                    updateTimerMillSecond = value;
+                }
+                // 規定よりも短い場合
+                else if (value < TwitterAwayInfo.UpdateTimerMinimumMillSec)
+                {
+                    updateTimerMillSecond = TwitterAwayInfo.UpdateTimerMinimumMillSec;
+                }
+                // 規定よりも長い場合
+                else if (value > TwitterAwayInfo.UpdateTimerMaximumMillSec)
+                {
+                    updateTimerMillSecond = TwitterAwayInfo.UpdateTimerMaximumMillSec;
+                }
+            }
+        }
 
         /// <summary>
         /// プロキシの接続方法列挙
@@ -202,6 +246,37 @@ namespace TwitterAway
                                     Password = reader.GetAttribute("password");
                                 }
                             } // End of User
+                            else if (reader.LocalName.Equals("UpdateTimer"))
+                            {
+                                if (reader.MoveToFirstAttribute())
+                                {
+                                    string check = reader.GetAttribute("check");
+                                    if (check == bool.TrueString)
+                                    {
+                                        UpdateTimerCheck = true;
+                                    }
+                                    else if (check == bool.FalseString)
+                                    {
+                                        UpdateTimerCheck = false;
+                                    }
+                                    try
+                                    {
+                                        UpdateTimerMillSecond = Convert.ToInt32(reader.GetAttribute("millsecond"));
+                                    }
+                                    catch (ArgumentException)
+                                    {
+                                        ;
+                                    }
+                                    catch (FormatException)
+                                    {
+                                        ;
+                                    }
+                                    catch (OverflowException)
+                                    {
+                                        ;
+                                    }
+                                }
+                            } // End of UpdateTimer
                             else if (reader.LocalName == "Proxy")
                             {
                                 if (reader.MoveToFirstAttribute())
@@ -356,6 +431,11 @@ namespace TwitterAway
                 writer.WriteAttributeString("name", UserName);
                 writer.WriteAttributeString("password", Password);
                 writer.WriteEndElement(); // End of User
+
+                writer.WriteStartElement("UpdateTimer");
+                writer.WriteAttributeString("check", UpdateTimerCheck.ToString());
+                writer.WriteAttributeString("millsecond", UpdateTimerMillSecond.ToString());
+                writer.WriteEndElement(); // End of UpdateTimer
 
                 writer.WriteStartElement("Proxy");
                 writer.WriteAttributeString("use", ProxyUse.ToString());

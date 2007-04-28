@@ -45,6 +45,15 @@ namespace TwitterAway
         private MenuItem cutDoingMenuItem;
         private MenuItem copyDoingMenuItem;
         private MenuItem pasteDoingMenuItem;
+        private MenuItem updateMenuItem;
+        private MenuItem updateCheckTimerMenuItem;
+        private MenuItem separateMenuItem3;
+        private Timer updateCheckTimer;
+
+        /// <summary>
+        /// CheckTwitterUpdate()の動作排他処理のためのフラグ
+        /// </summary>
+        private bool checkTwitterUpdateNowFlag;
 
         /// <summary>
         /// アンカーコントロールのリスト
@@ -78,6 +87,7 @@ namespace TwitterAway
             this.versionInfoMenuItem = new System.Windows.Forms.MenuItem();
             this.separateMenuItem2 = new System.Windows.Forms.MenuItem();
             this.exitMenuItem = new System.Windows.Forms.MenuItem();
+            this.updateMenuItem = new System.Windows.Forms.MenuItem();
             this.twitterListView = new System.Windows.Forms.ListView();
             this.screenNameColumnHeader = new System.Windows.Forms.ColumnHeader();
             this.doingColumnHeader = new System.Windows.Forms.ColumnHeader();
@@ -89,17 +99,23 @@ namespace TwitterAway
             this.pasteDoingMenuItem = new System.Windows.Forms.MenuItem();
             this.updateButton = new System.Windows.Forms.Button();
             this.inputPanel = new Microsoft.WindowsCE.Forms.InputPanel();
+            this.updateCheckTimerMenuItem = new System.Windows.Forms.MenuItem();
+            this.separateMenuItem3 = new System.Windows.Forms.MenuItem();
+            this.updateCheckTimer = new System.Windows.Forms.Timer();
             // 
             // mainMenu
             // 
             this.mainMenu.MenuItems.Add(this.menuMenuItem);
+            this.mainMenu.MenuItems.Add(this.updateMenuItem);
             // 
             // menuMenuItem
             // 
-            this.menuMenuItem.MenuItems.Add(this.pocketLadioSettingMenuItem);
+            this.menuMenuItem.MenuItems.Add(this.updateCheckTimerMenuItem);
             this.menuMenuItem.MenuItems.Add(this.separateMenuItem1);
-            this.menuMenuItem.MenuItems.Add(this.versionInfoMenuItem);
+            this.menuMenuItem.MenuItems.Add(this.pocketLadioSettingMenuItem);
             this.menuMenuItem.MenuItems.Add(this.separateMenuItem2);
+            this.menuMenuItem.MenuItems.Add(this.versionInfoMenuItem);
+            this.menuMenuItem.MenuItems.Add(this.separateMenuItem3);
             this.menuMenuItem.MenuItems.Add(this.exitMenuItem);
             this.menuMenuItem.Text = "メニュー(&M)";
             // 
@@ -125,6 +141,11 @@ namespace TwitterAway
             // 
             this.exitMenuItem.Text = "終了(&X)";
             this.exitMenuItem.Click += new System.EventHandler(this.exitMenuItem_Click);
+            // 
+            // updateMenuItem
+            // 
+            this.updateMenuItem.Text = "Update";
+            this.updateMenuItem.Click += new System.EventHandler(this.updateMenuItem_Click);
             // 
             // twitterListView
             // 
@@ -184,12 +205,25 @@ namespace TwitterAway
             // 
             this.updateButton.Location = new System.Drawing.Point(173, 244);
             this.updateButton.Size = new System.Drawing.Size(64, 20);
-            this.updateButton.Text = "Update";
+            this.updateButton.Text = "&Update";
             this.updateButton.Click += new System.EventHandler(this.updateButton_Click);
             // 
             // inputPanel
             // 
             this.inputPanel.EnabledChanged += new System.EventHandler(this.inputPanel_EnabledChanged);
+            // 
+            // updateCheckTimerMenuItem
+            // 
+            this.updateCheckTimerMenuItem.Text = "Twitterを一定間隔でチェック(&T)";
+            this.updateCheckTimerMenuItem.Click += new System.EventHandler(this.updateCheckTimerMenuItem_Click);
+            // 
+            // separateMenuItem3
+            // 
+            this.separateMenuItem3.Text = "-";
+            // 
+            // updateCheckTimer
+            // 
+            this.updateCheckTimer.Tick += new System.EventHandler(this.updateCheckTimer_Tick);
             // 
             // MainForm
             // 
@@ -200,6 +234,7 @@ namespace TwitterAway
             this.Menu = this.mainMenu;
             this.Text = "TwitterAway";
             this.Resize += new System.EventHandler(this.MainForm_Resize);
+            this.Activated += new System.EventHandler(this.MainForm_Activated);
             this.Closing += new System.ComponentModel.CancelEventHandler(this.MainForm_Closing);
             this.Load += new System.EventHandler(this.MainForm_Load);
 
@@ -292,8 +327,20 @@ namespace TwitterAway
             updateButton.Visible = true;
         }
 
-        private void updateButton_Click(object sender, EventArgs e)
+        /// <summary>
+        /// Twitterのチェック
+        /// </summary>
+        private void CheckTwitterUpdate()
         {
+            // CheckHeadline()が処理の場合は何もせず終了
+            if (checkTwitterUpdateNowFlag == true)
+            {
+                return;
+            }
+
+            // 排他処理のためのフラグを立てる
+            checkTwitterUpdateNowFlag = true;
+
             #region UI前処理
 
             // フォームをいったん選択不可にする
@@ -302,65 +349,57 @@ namespace TwitterAway
             #endregion
 
             Twitter.Twitter twitterAccount = new TwitterAway.Twitter.Twitter(UserSetting.UserName, UserSetting.Password);
-            if (doingTextBox.Text == string.Empty)
+            try
             {
-                try
+                if (doingTextBox.Text == string.Empty)
                 {
                     UpdateTwitterListView(twitterAccount);
                 }
-                catch (WebException ex)
-                {
-                    if (ex.Status == WebExceptionStatus.ProtocolError)
-                    {
-                        MessageBox.Show("ステータスをアップデートできませんでした。Twitterのユーザー名とパスワードが間違っている可能性があります。");
-                    }
-                    else if (ex.Status == WebExceptionStatus.Timeout)
-                    {
-                        MessageBox.Show("ステータスをアップデートできませんでした。接続がタイムアウトしました。");
-                    }
-                    else
-                    {
-                        MessageBox.Show("ステータスをアップデートできませんでした。");
-                    }
-                }
-            }
-            else
-            {
-                try
+                else
                 {
                     twitterAccount.Update(doingTextBox.Text);
                     doingTextBox.Text = string.Empty;
                     UpdateTwitterListView(twitterAccount);
                 }
-                catch (WebException ex)
+            }
+            catch (WebException ex)
+            {
+                if (ex.Status == WebExceptionStatus.ProtocolError)
                 {
-                    if (ex.Status == WebExceptionStatus.ProtocolError)
-                    {
-                        MessageBox.Show("ステータスをアップデートできませんでした。Twitterのユーザー名とパスワードが間違っている可能性があります。");
-                    }
-                    else if (ex.Status == WebExceptionStatus.Timeout)
-                    {
-                        MessageBox.Show("ステータスをアップデートできませんでした。接続がタイムアウトしました。", "警告");
-                    }
-                    else
-                    {
-                        MessageBox.Show("ステータスをアップデートできませんでした。", "警告");
-                    }
+                    MessageBox.Show("ステータスをアップデートできませんでした。Twitterのユーザー名とパスワードが間違っている可能性があります。");
                 }
-                catch (UriFormatException)
+                else if (ex.Status == WebExceptionStatus.Timeout)
                 {
-                    MessageBox.Show("ステータスをアップデートできませんでした。ステータスが長すぎる可能性があります。", "警告");
+                    MessageBox.Show("ステータスをアップデートできませんでした。接続がタイムアウトしました。", "警告");
+                }
+                else
+                {
+                    MessageBox.Show("ステータスをアップデートできませんでした。", "警告");
                 }
             }
+            catch (UriFormatException)
+            {
+                MessageBox.Show("ステータスをアップデートできませんでした。ステータスが長すぎる可能性があります。", "警告");
+            }
+            finally
+            {
+                #region  UI後処理
 
-            #region  UI後処理
+                // フォームを選択可能に回復する
+                this.Enabled = true;
 
-            // フォームを選択可能に回復する
-            this.Enabled = true;
+                #endregion
 
-            #endregion
+                // 排他処理のためのフラグを下げる
+                checkTwitterUpdateNowFlag = false;
+            }
+
         }
 
+        /// <summary>
+        /// リストの更新
+        /// </summary>
+        /// <param name="twitterAccount">Twitterアカウント</param>
         private void UpdateTwitterListView(Twitter.Twitter twitterAccount)
         {
             twitterListView.Items.Clear();
@@ -391,6 +430,50 @@ namespace TwitterAway
             }
         }
 
+        /// <summary>
+        /// タイマーのスタート時の処理
+        /// </summary>
+        private void UpdateCheckTimerStart()
+        {
+            UserSetting.UpdateTimerCheck = true;
+            updateCheckTimerMenuItem.Checked = true;
+            updateCheckTimer.Interval = UserSetting.UpdateTimerMillSecond;
+            updateCheckTimer.Enabled = true;
+        }
+
+        /// <summary>
+        /// タイマーのストップ時の処理
+        /// </summary>
+        private void UpdateCheckTimerStop()
+        {
+            UserSetting.UpdateTimerCheck = false;
+            updateCheckTimerMenuItem.Checked = false;
+            updateCheckTimer.Enabled = false;
+        }
+
+        /// <summary>
+        /// タイマーのインターバルが変更されたときの処理
+        /// </summary>
+        /// <param name="interval">タイマーのインターバル</param>
+        public void UpdateTimerIntervalChange(int interval)
+        {
+            if (UserSetting.UpdateTimerCheck == true)
+            {
+                updateCheckTimer.Enabled = false;
+                updateCheckTimer.Interval = interval;
+                updateCheckTimer.Enabled = true;
+            }
+            else
+            {
+                updateCheckTimer.Interval = interval;
+            }
+        }
+
+        private void updateButton_Click(object sender, EventArgs e)
+        {
+            CheckTwitterUpdate();
+        }
+
         private void MainForm_Load(object sender, EventArgs e)
         {
             try
@@ -410,6 +493,16 @@ namespace TwitterAway
             {
                 // 起動時の初期化
                 TwitterAwaySpecificProcess.StartUpInitialize();
+
+                // アップデートタイマーの設定が有効な場合、タイマーを動作させる
+                if (UserSetting.UpdateTimerCheck == true)
+                {
+                    UpdateCheckTimerStart();
+                }
+                else
+                {
+                    UpdateCheckTimerStop();
+                }
             }
             catch (XmlException)
             {
@@ -529,6 +622,33 @@ namespace TwitterAway
             UserSetting.TwitterListViewNameColumnWidth = twitterListView.Columns[0].Width;
             UserSetting.TwitterListViewDoingColumnWidth = twitterListView.Columns[1].Width;
             UserSetting.TwitterListViewDateColumnWidth = twitterListView.Columns[2].Width;
+        }
+
+        private void updateMenuItem_Click(object sender, EventArgs e)
+        {
+            updateButton_Click(sender, e);
+        }
+
+        private void updateCheckTimerMenuItem_Click(object sender, EventArgs e)
+        {
+            if (UserSetting.UpdateTimerCheck == true)
+            {
+                UpdateCheckTimerStop();
+            }
+            else if (UserSetting.UpdateTimerCheck == false)
+            {
+                UpdateCheckTimerStart();
+            }
+        }
+
+        private void updateCheckTimer_Tick(object sender, EventArgs e)
+        {
+            CheckTwitterUpdate();
+        }
+
+        private void MainForm_Activated(object sender, EventArgs e)
+        {
+            UpdateTimerIntervalChange(UserSetting.UpdateTimerMillSecond);
         }
     }
 }
