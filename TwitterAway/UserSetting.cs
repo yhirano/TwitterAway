@@ -44,6 +44,28 @@ namespace TwitterAway
         }
 
         /// <summary>
+        /// チェックするリスト列挙
+        /// </summary>
+        public enum CheckLists
+        {
+            Friends, Public
+        }
+
+        /// <summary>
+        /// チェックするリスト
+        /// </summary>
+        private static CheckLists checkList = CheckLists.Friends;
+
+        /// <summary>
+        /// チェックするリスト
+        /// </summary>
+        public static CheckLists CheckList
+        {
+            get { return checkList; }
+            set { checkList = value; }
+        }
+
+        /// <summary>
         /// タイマーでチェックするか
         /// </summary>
         private static bool updateTimerCheck;
@@ -91,7 +113,7 @@ namespace TwitterAway
         /// <summary>
         /// プロキシの接続方法列挙
         /// </summary>
-        public enum ProxyConnect
+        public enum ProxyConnects
         {
             Unuse, OsSetting, OriginalSetting
         }
@@ -99,12 +121,12 @@ namespace TwitterAway
         /// <summary>
         /// プロキシの接続方法
         /// </summary>
-        private static ProxyConnect proxyUse = ProxyConnect.OsSetting;
+        private static ProxyConnects proxyUse = ProxyConnects.OsSetting;
 
         /// <summary>
         /// プロキシの接続方法
         /// </summary>
-        public static ProxyConnect ProxyUse
+        public static ProxyConnects ProxyUse
         {
             get { return UserSetting.proxyUse; }
             set { UserSetting.proxyUse = value; }
@@ -173,7 +195,7 @@ namespace TwitterAway
         /// <summary>
         /// TwitterListViewのName欄の幅
         /// </summary>
-        private static int twitterListViewNameColumnWidth=60;
+        private static int twitterListViewNameColumnWidth = 60;
 
         /// <summary>
         /// TwitterListViewのName欄の幅
@@ -187,7 +209,7 @@ namespace TwitterAway
         /// <summary>
         /// TwitterListViewのDowing欄の幅
         /// </summary>
-        private static int twitterListViewDoingColumnWidth=120;
+        private static int twitterListViewDoingColumnWidth = 120;
 
         /// <summary>
         /// TwitterListViewのDowing欄の幅
@@ -201,7 +223,7 @@ namespace TwitterAway
         /// <summary>
         /// TwitterListViewのDate欄の幅
         /// </summary>
-        private static int twitterListViewDateColumnWidth=50;
+        private static int twitterListViewDateColumnWidth = 50;
 
         /// <summary>
         /// TwitterListViewのDate欄の幅
@@ -246,7 +268,19 @@ namespace TwitterAway
                                     Password = reader.GetAttribute("password");
                                 }
                             } // End of User
-                            else if (reader.LocalName.Equals("UpdateTimer"))
+                            else if (reader.LocalName == "CheckList")
+                            {
+                                string check = reader.GetAttribute("list");
+                                if (check == CheckLists.Friends.ToString())
+                                {
+                                    CheckList = CheckLists.Friends;
+                                }
+                                else if (check == CheckLists.Public.ToString())
+                                {
+                                    CheckList = CheckLists.Public;
+                                }
+                            } // End of CheckList
+                            else if (reader.LocalName == "UpdateTimer")
                             {
                                 if (reader.MoveToFirstAttribute())
                                 {
@@ -282,17 +316,17 @@ namespace TwitterAway
                                 if (reader.MoveToFirstAttribute())
                                 {
                                     string use = reader.GetAttribute("use");
-                                    if (use == ProxyConnect.Unuse.ToString())
+                                    if (use == ProxyConnects.Unuse.ToString())
                                     {
-                                        ProxyUse = ProxyConnect.Unuse;
+                                        ProxyUse = ProxyConnects.Unuse;
                                     }
-                                    else if (use == ProxyConnect.OsSetting.ToString())
+                                    else if (use == ProxyConnects.OsSetting.ToString())
                                     {
-                                        ProxyUse = ProxyConnect.OsSetting;
+                                        ProxyUse = ProxyConnects.OsSetting;
                                     }
-                                    else if (use == ProxyConnect.OriginalSetting.ToString())
+                                    else if (use == ProxyConnects.OriginalSetting.ToString())
                                     {
-                                        ProxyUse = ProxyConnect.OriginalSetting;
+                                        ProxyUse = ProxyConnects.OriginalSetting;
                                     }
 
                                     ProxyServer = reader.GetAttribute("server");
@@ -431,6 +465,10 @@ namespace TwitterAway
                 writer.WriteAttributeString("name", UserName);
                 writer.WriteAttributeString("password", Password);
                 writer.WriteEndElement(); // End of User
+
+                writer.WriteStartElement("CheckList");
+                writer.WriteAttributeString("list", CheckList.ToString());
+                writer.WriteEndElement(); // End of CheckList
 
                 writer.WriteStartElement("UpdateTimer");
                 writer.WriteAttributeString("check", UpdateTimerCheck.ToString());

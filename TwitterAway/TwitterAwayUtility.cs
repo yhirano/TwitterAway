@@ -79,15 +79,15 @@ namespace TwitterAway
                 ws.Method = requestMethod;
             }
 
-            if (TwitterAway.UserSetting.ProxyUse == UserSetting.ProxyConnect.Unuse)
+            if (TwitterAway.UserSetting.ProxyUse == UserSetting.ProxyConnects.Unuse)
             {
                 ws.ProxyUse = WebStream.ProxyConnect.Unuse;
             }
-            else if (TwitterAway.UserSetting.ProxyUse == UserSetting.ProxyConnect.OsSetting)
+            else if (TwitterAway.UserSetting.ProxyUse == UserSetting.ProxyConnects.OsSetting)
             {
                 ws.ProxyUse = WebStream.ProxyConnect.OsSetting;
             }
-            else if (TwitterAway.UserSetting.ProxyUse == UserSetting.ProxyConnect.OriginalSetting)
+            else if (TwitterAway.UserSetting.ProxyUse == UserSetting.ProxyConnects.OriginalSetting)
             {
                 ws.ProxyUse = WebStream.ProxyConnect.OriginalSetting;
             }

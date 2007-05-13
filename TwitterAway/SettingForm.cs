@@ -52,6 +52,10 @@ namespace TwitterAway
         private MenuItem pastePasswordPathMenuItem;
         private NumericUpDown updateTimerSecondNumericUpDown;
         private Label updateTimerSecondLabel;
+        private Panel getListPanel;
+        private Label checkListLabel;
+        private RadioButton checkPublicRadioButton;
+        private RadioButton checkFriendsRadioButton;
         /// <summary>
         /// フォームのメイン メニューです。
         /// </summary>
@@ -82,6 +86,12 @@ namespace TwitterAway
             this.okMenuItem = new System.Windows.Forms.MenuItem();
             this.settingTabControl = new System.Windows.Forms.TabControl();
             this.settingTabPage = new System.Windows.Forms.TabPage();
+            this.getListPanel = new System.Windows.Forms.Panel();
+            this.checkPublicRadioButton = new System.Windows.Forms.RadioButton();
+            this.checkFriendsRadioButton = new System.Windows.Forms.RadioButton();
+            this.checkListLabel = new System.Windows.Forms.Label();
+            this.updateTimerSecondNumericUpDown = new System.Windows.Forms.NumericUpDown();
+            this.updateTimerSecondLabel = new System.Windows.Forms.Label();
             this.passwordTextBox = new System.Windows.Forms.TextBox();
             this.passwordPathContextMenu = new System.Windows.Forms.ContextMenu();
             this.cutPasswordPathMenuItem = new System.Windows.Forms.MenuItem();
@@ -111,8 +121,6 @@ namespace TwitterAway
             this.proxyUnuseRadioButton = new System.Windows.Forms.RadioButton();
             this.proxyPortLabel = new System.Windows.Forms.Label();
             this.proxyServerLabel = new System.Windows.Forms.Label();
-            this.updateTimerSecondNumericUpDown = new System.Windows.Forms.NumericUpDown();
-            this.updateTimerSecondLabel = new System.Windows.Forms.Label();
             // 
             // mainMenu
             // 
@@ -133,6 +141,7 @@ namespace TwitterAway
             // 
             // settingTabPage
             // 
+            this.settingTabPage.Controls.Add(this.getListPanel);
             this.settingTabPage.Controls.Add(this.updateTimerSecondNumericUpDown);
             this.settingTabPage.Controls.Add(this.updateTimerSecondLabel);
             this.settingTabPage.Controls.Add(this.passwordTextBox);
@@ -142,6 +151,50 @@ namespace TwitterAway
             this.settingTabPage.Location = new System.Drawing.Point(0, 0);
             this.settingTabPage.Size = new System.Drawing.Size(240, 245);
             this.settingTabPage.Text = "基本";
+            // 
+            // getListPanel
+            // 
+            this.getListPanel.Controls.Add(this.checkPublicRadioButton);
+            this.getListPanel.Controls.Add(this.checkFriendsRadioButton);
+            this.getListPanel.Controls.Add(this.checkListLabel);
+            this.getListPanel.Location = new System.Drawing.Point(0, 58);
+            this.getListPanel.Size = new System.Drawing.Size(240, 77);
+            // 
+            // checkPublicRadioButton
+            // 
+            this.checkPublicRadioButton.Location = new System.Drawing.Point(3, 49);
+            this.checkPublicRadioButton.Size = new System.Drawing.Size(234, 20);
+            this.checkPublicRadioButton.Text = "The Public List";
+            // 
+            // checkFriendsRadioButton
+            // 
+            this.checkFriendsRadioButton.Checked = true;
+            this.checkFriendsRadioButton.Location = new System.Drawing.Point(3, 23);
+            this.checkFriendsRadioButton.Size = new System.Drawing.Size(234, 20);
+            this.checkFriendsRadioButton.Text = "The Friends List";
+            // 
+            // checkListLabel
+            // 
+            this.checkListLabel.Location = new System.Drawing.Point(3, 0);
+            this.checkListLabel.Size = new System.Drawing.Size(234, 20);
+            this.checkListLabel.Text = "チェックするTwitterリスト";
+            // 
+            // updateTimerSecondNumericUpDown
+            // 
+            this.updateTimerSecondNumericUpDown.Location = new System.Drawing.Point(182, 161);
+            this.updateTimerSecondNumericUpDown.ReadOnly = true;
+            this.updateTimerSecondNumericUpDown.Size = new System.Drawing.Size(55, 22);
+            this.updateTimerSecondNumericUpDown.Value = new decimal(new int[] {
+            60,
+            0,
+            0,
+            0});
+            // 
+            // updateTimerSecondLabel
+            // 
+            this.updateTimerSecondLabel.Location = new System.Drawing.Point(3, 138);
+            this.updateTimerSecondLabel.Size = new System.Drawing.Size(234, 20);
+            this.updateTimerSecondLabel.Text = "Twitterの自動アップデート間隔(秒)";
             // 
             // passwordTextBox
             // 
@@ -322,23 +375,6 @@ namespace TwitterAway
             this.proxyServerLabel.Size = new System.Drawing.Size(234, 16);
             this.proxyServerLabel.Text = "プロキシサーバ （例：proxy.example.com）";
             // 
-            // updateTimerSecondNumericUpDown
-            // 
-            this.updateTimerSecondNumericUpDown.Location = new System.Drawing.Point(182, 93);
-            this.updateTimerSecondNumericUpDown.ReadOnly = true;
-            this.updateTimerSecondNumericUpDown.Size = new System.Drawing.Size(55, 22);
-            this.updateTimerSecondNumericUpDown.Value = new decimal(new int[] {
-            60,
-            0,
-            0,
-            0});
-            // 
-            // updateTimerSecondLabel
-            // 
-            this.updateTimerSecondLabel.Location = new System.Drawing.Point(3, 70);
-            this.updateTimerSecondLabel.Size = new System.Drawing.Size(234, 20);
-            this.updateTimerSecondLabel.Text = "Twitterの自動アップデート間隔(秒)";
-            // 
             // SettingForm
             // 
             this.ClientSize = new System.Drawing.Size(240, 268);
@@ -362,21 +398,38 @@ namespace TwitterAway
 
             userNameTextBox.Text = UserSetting.UserName;
             passwordTextBox.Text = UserSetting.Password;
+
+            if (UserSetting.CheckList == UserSetting.CheckLists.Friends)
+            {
+                checkFriendsRadioButton.Checked = true;
+                checkPublicRadioButton.Checked = false;
+            }
+            else if (UserSetting.CheckList == UserSetting.CheckLists.Public)
+            {
+                checkFriendsRadioButton.Checked = false;
+                checkPublicRadioButton.Checked = true;
+            }
+            else
+            {
+                // ここに到達することはあり得ない
+                Trace.Assert(false, "想定外の動作のため、終了します");
+            }
+
             updateTimerSecondNumericUpDown.Text = (UserSetting.UpdateTimerMillSecond / 1000).ToString();
 
-            if (UserSetting.ProxyUse == UserSetting.ProxyConnect.Unuse)
+            if (UserSetting.ProxyUse == UserSetting.ProxyConnects.Unuse)
             {
                 proxyUnuseRadioButton.Checked = true;
                 proxyUseOsSettingRadioButton.Checked = false;
                 proxyUseOriginalSettingRadioButton.Checked = false;
             }
-            else if (UserSetting.ProxyUse == UserSetting.ProxyConnect.OsSetting)
+            else if (UserSetting.ProxyUse == UserSetting.ProxyConnects.OsSetting)
             {
                 proxyUnuseRadioButton.Checked = false;
                 proxyUseOsSettingRadioButton.Checked = true;
                 proxyUseOriginalSettingRadioButton.Checked = false;
             }
-            else if (UserSetting.ProxyUse == UserSetting.ProxyConnect.OriginalSetting)
+            else if (UserSetting.ProxyUse == UserSetting.ProxyConnects.OriginalSetting)
             {
                 proxyUnuseRadioButton.Checked = false;
                 proxyUseOsSettingRadioButton.Checked = false;
@@ -401,6 +454,20 @@ namespace TwitterAway
             UserSetting.UserName = userNameTextBox.Text;
             UserSetting.Password = passwordTextBox.Text;
 
+            if (checkFriendsRadioButton.Checked == true)
+            {
+                UserSetting.CheckList = UserSetting.CheckLists.Friends;
+            }
+            else if (checkPublicRadioButton.Checked == true)
+            {
+                UserSetting.CheckList = UserSetting.CheckLists.Public;
+            }
+            else
+            {
+                // ここに到達することはあり得ない
+                Trace.Assert(false, "想定外の動作のため、終了します");
+            }
+
             try
             {
                 UserSetting.UpdateTimerMillSecond = Convert.ToInt32(updateTimerSecondNumericUpDown.Text) * 1000;
@@ -420,15 +487,15 @@ namespace TwitterAway
 
             if (proxyUnuseRadioButton.Checked == true)
             {
-                UserSetting.ProxyUse = UserSetting.ProxyConnect.Unuse;
+                UserSetting.ProxyUse = UserSetting.ProxyConnects.Unuse;
             }
             else if (proxyUseOsSettingRadioButton.Checked == true)
             {
-                UserSetting.ProxyUse = UserSetting.ProxyConnect.OsSetting;
+                UserSetting.ProxyUse = UserSetting.ProxyConnects.OsSetting;
             }
             else if (proxyUseOriginalSettingRadioButton.Checked == true)
             {
-                UserSetting.ProxyUse = UserSetting.ProxyConnect.OriginalSetting;
+                UserSetting.ProxyUse = UserSetting.ProxyConnects.OriginalSetting;
             }
             else
             {

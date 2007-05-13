@@ -405,26 +405,36 @@ namespace TwitterAway
             twitterListView.Items.Clear();
             twitterListView.BeginUpdate();
 
-            Twitter.StatusInfomation[] sts = twitterAccount.FriendTimeline();
-            foreach (Twitter.StatusInfomation s in sts)
+            Twitter.StatusInfomation[] statuses = null;
+
+            if (UserSetting.CheckList == UserSetting.CheckLists.Friends)
+            {
+                statuses = twitterAccount.FriendTimeline();
+            }
+            else if (UserSetting.CheckList == UserSetting.CheckLists.Public)
+            {
+                statuses = twitterAccount.PublicTimeline();
+            }
+
+            foreach (Twitter.StatusInfomation statusInfomation in statuses)
             {
                 string date = string.Empty;
-                if (DateTime.Today <= s.CreatedAt)
+                if (DateTime.Today <= statusInfomation.CreatedAt)
                 {
-                    date = s.CreatedAt.ToString("HH':'mm");
+                    date = statusInfomation.CreatedAt.ToString("HH':'mm");
                 }
                 else
                 {
-                    date = s.CreatedAt.ToString("M'/'d");
+                    date = statusInfomation.CreatedAt.ToString("M'/'d");
                 }
 
-                string[] str = { s.User.ScreenName, s.Text, date };
+                string[] str = { statusInfomation.User.ScreenName, statusInfomation.Text, date };
                 twitterListView.Items.Add(new ListViewItem(str));
             }
 
             twitterListView.EndUpdate();
 
-            if (sts.Length == 0)
+            if (statuses.Length == 0)
             {
                 MessageBox.Show("ステータスがありません。", "情報");
             }
@@ -534,6 +544,7 @@ namespace TwitterAway
 
         private void exitMenuItem_Click(object sender, EventArgs e)
         {
+            Close();
             Application.Exit();
         }
 
