@@ -328,9 +328,18 @@ namespace TwitterAway
         }
 
         /// <summary>
-        /// Twitterのチェック
+        /// Twitterのチェックと投稿。テキストボックスの内容を投稿する。
         /// </summary>
         private void CheckTwitterUpdate()
+        {
+            CheckTwitterUpdate(true);
+        }
+
+        /// <summary>
+        /// Twitterのチェックと投稿
+        /// </summary>
+        /// <param name="post">trueの場合、テキストボックスの内容を投稿する。</param>
+        private void CheckTwitterUpdate(bool post)
         {
             // CheckHeadline()が処理の場合は何もせず終了
             if (checkTwitterUpdateNowFlag == true)
@@ -344,14 +353,17 @@ namespace TwitterAway
             #region UI前処理
 
             // フォームをいったん選択不可にする
-            this.Enabled = false;
+            menuMenuItem.Enabled = false;
+            updateMenuItem.Enabled = false;
+            twitterListView.Enabled = false;
+            updateButton.Enabled = false;
 
             #endregion
 
             Twitter.Twitter twitterAccount = new TwitterAway.Twitter.Twitter(UserSetting.UserName, UserSetting.Password);
             try
             {
-                if (doingTextBox.Text == string.Empty)
+                if (post == false || doingTextBox.Text == string.Empty)
                 {
                     UpdateTwitterListView(twitterAccount);
                 }
@@ -386,7 +398,10 @@ namespace TwitterAway
                 #region  UI後処理
 
                 // フォームを選択可能に回復する
-                this.Enabled = true;
+                menuMenuItem.Enabled = true;
+                updateMenuItem.Enabled = true;
+                twitterListView.Enabled = true;
+                updateButton.Enabled = true;
 
                 #endregion
 
@@ -654,7 +669,7 @@ namespace TwitterAway
 
         private void updateCheckTimer_Tick(object sender, EventArgs e)
         {
-            CheckTwitterUpdate();
+            CheckTwitterUpdate(false);
         }
 
         private void MainForm_Activated(object sender, EventArgs e)
