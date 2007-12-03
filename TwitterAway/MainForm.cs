@@ -55,6 +55,7 @@ namespace TwitterAway
         /// CheckTwitterUpdate()の動作排他処理のためのフラグ
         /// </summary>
         private bool checkTwitterUpdateNowFlag;
+        private ImageList profileImageList;
 
         /// <summary>
         /// アンカーコントロールのリスト
@@ -83,10 +84,12 @@ namespace TwitterAway
         {
             this.mainMenu = new System.Windows.Forms.MainMenu();
             this.menuMenuItem = new System.Windows.Forms.MenuItem();
-            this.pocketLadioSettingMenuItem = new System.Windows.Forms.MenuItem();
+            this.updateCheckTimerMenuItem = new System.Windows.Forms.MenuItem();
             this.separateMenuItem1 = new System.Windows.Forms.MenuItem();
-            this.versionInfoMenuItem = new System.Windows.Forms.MenuItem();
+            this.pocketLadioSettingMenuItem = new System.Windows.Forms.MenuItem();
             this.separateMenuItem2 = new System.Windows.Forms.MenuItem();
+            this.versionInfoMenuItem = new System.Windows.Forms.MenuItem();
+            this.separateMenuItem3 = new System.Windows.Forms.MenuItem();
             this.exitMenuItem = new System.Windows.Forms.MenuItem();
             this.updateMenuItem = new System.Windows.Forms.MenuItem();
             this.twitterListView = new System.Windows.Forms.ListView();
@@ -100,9 +103,8 @@ namespace TwitterAway
             this.pasteDoingMenuItem = new System.Windows.Forms.MenuItem();
             this.updateButton = new System.Windows.Forms.Button();
             this.inputPanel = new Microsoft.WindowsCE.Forms.InputPanel();
-            this.updateCheckTimerMenuItem = new System.Windows.Forms.MenuItem();
-            this.separateMenuItem3 = new System.Windows.Forms.MenuItem();
             this.updateCheckTimer = new System.Windows.Forms.Timer();
+            this.profileImageList = new System.Windows.Forms.ImageList();
             // 
             // mainMenu
             // 
@@ -120,23 +122,32 @@ namespace TwitterAway
             this.menuMenuItem.MenuItems.Add(this.exitMenuItem);
             this.menuMenuItem.Text = "メニュー(&M)";
             // 
+            // updateCheckTimerMenuItem
+            // 
+            this.updateCheckTimerMenuItem.Text = "Twitterを一定間隔でチェック(&T)";
+            this.updateCheckTimerMenuItem.Click += new System.EventHandler(this.updateCheckTimerMenuItem_Click);
+            // 
+            // separateMenuItem1
+            // 
+            this.separateMenuItem1.Text = "-";
+            // 
             // pocketLadioSettingMenuItem
             // 
             this.pocketLadioSettingMenuItem.Text = "TwitterAway設定(&T)";
             this.pocketLadioSettingMenuItem.Click += new System.EventHandler(this.pocketLadioSettingMenuItem_Click);
             // 
-            // separateMenuItem1
+            // separateMenuItem2
             // 
-            this.separateMenuItem1.Text = "-";
+            this.separateMenuItem2.Text = "-";
             // 
             // versionInfoMenuItem
             // 
             this.versionInfoMenuItem.Text = "バージョン情報(&A)";
             this.versionInfoMenuItem.Click += new System.EventHandler(this.versionInfoMenuItem_Click);
             // 
-            // separateMenuItem2
+            // separateMenuItem3
             // 
-            this.separateMenuItem2.Text = "-";
+            this.separateMenuItem3.Text = "-";
             // 
             // exitMenuItem
             // 
@@ -155,6 +166,7 @@ namespace TwitterAway
             this.twitterListView.Columns.Add(this.dateColumnHeader);
             this.twitterListView.Location = new System.Drawing.Point(3, 3);
             this.twitterListView.Size = new System.Drawing.Size(234, 235);
+            this.twitterListView.SmallImageList = this.profileImageList;
             this.twitterListView.View = System.Windows.Forms.View.Details;
             // 
             // screenNameColumnHeader
@@ -213,18 +225,13 @@ namespace TwitterAway
             // 
             this.inputPanel.EnabledChanged += new System.EventHandler(this.inputPanel_EnabledChanged);
             // 
-            // updateCheckTimerMenuItem
-            // 
-            this.updateCheckTimerMenuItem.Text = "Twitterを一定間隔でチェック(&T)";
-            this.updateCheckTimerMenuItem.Click += new System.EventHandler(this.updateCheckTimerMenuItem_Click);
-            // 
-            // separateMenuItem3
-            // 
-            this.separateMenuItem3.Text = "-";
-            // 
             // updateCheckTimer
             // 
             this.updateCheckTimer.Tick += new System.EventHandler(this.updateCheckTimer_Tick);
+            // 
+            // profileImageList
+            // 
+            this.profileImageList.ImageSize = new System.Drawing.Size(16, 16);
             // 
             // MainForm
             // 
@@ -477,8 +484,14 @@ namespace TwitterAway
                     date = statusInfomation.CreatedAt.ToString("M'/'d");
                 }
 
-                string[] str = { statusInfomation.User.ScreenName, statusInfomation.Text, date };
-                twitterListView.Items.Add(new ListViewItem(str));
+                string[] str = { statusInfomation.User.Name, statusInfomation.Text, date };
+
+                ListViewItem item = new ListViewItem(str);
+                if (statusInfomation.User.ProfileImageUrl != null)
+                {
+                    item.ImageIndex = GetProfileImage(statusInfomation.User.ProfileImageUrl);
+                }
+                twitterListView.Items.Add(item);
             }
 
             twitterListView.EndUpdate();
@@ -486,6 +499,60 @@ namespace TwitterAway
             if (statuses.Length == 0)
             {
                 MessageBox.Show("ステータスがありません。", "情報");
+            }
+        }
+
+        /// <summary>
+        /// プロフィールイメージのURLとインデックスの値のハッシュ
+        /// </summary>
+        private Hashtable profileIndexHashTable = new Hashtable();
+
+        /// <summary>
+        /// ProfileImageのURLからImageを取得、ImageListを作成し、URLに該当するImageListのIndexを返す。
+        /// 一度URLから取得したImageは、ImageListに格納したままIndexのみを返す。
+        /// </summary>
+        /// <param name="profileImageUrl"></param>
+        /// <returns></returns>
+        private int GetProfileImage(Uri profileImageUrl)
+        {
+            // すでにハッシュにURLのキーがある場合（profileImageListに既にイメージがある場合）
+            if (profileIndexHashTable.ContainsKey(profileImageUrl) == true)
+            {
+                return (int)profileIndexHashTable[profileImageUrl];
+            }
+            // ハッシュににURLのキーがない場合
+            else
+            {
+                // イメージを取得する
+                Stream st = null;
+                Image image = null;
+                int value = -1;
+                try
+                {
+                    st = TwitterAwayUtility.GetWebStream(profileImageUrl);
+                    image = new Bitmap(st);
+                    profileImageList.Images.Add(image);
+                    value = profileImageList.Images.Count - 1;
+                    profileIndexHashTable[profileImageUrl] = value;
+                }
+                catch
+                {
+                    if (image != null)
+                    {
+                        profileImageList.Images.RemoveAt(profileImageList.Images.Count - 1);
+                    }
+                    value = -1;
+                    profileIndexHashTable[profileImageUrl] = value;
+                }
+                finally
+                {
+                    if (st != null)
+                    {
+                        st.Close();
+                    }
+                }
+
+                return value;
             }
         }
 

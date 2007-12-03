@@ -41,14 +41,18 @@ namespace TwitterAway.Twitter
         /// <summary>
         /// コンストラクタ
         /// </summary>
-        /// <param name="userName"></param>
-        /// <param name="password"></param>
+        /// <param name="userName">ユーザ名</param>
+        /// <param name="password">パスワード</param>
         public Twitter(string userName, string password)
         {
             this.userName = userName;
             this.password = password;
         }
 
+        /// <summary>
+        /// PublicTimelineを取得する
+        /// </summary>
+        /// <returns>取得したPublicTimelineのステータス情報</returns>
         public StatusInfomation[] PublicTimeline()
         {
             WebStream st = null;
@@ -70,6 +74,10 @@ namespace TwitterAway.Twitter
             return statuses;
         }
 
+        /// <summary>
+        /// FriendTimelineを取得する
+        /// </summary>
+        /// <returns>取得したFriendTimelineのステータス情報</returns>
         public StatusInfomation[] FriendTimeline()
         {
             WebStream st = null;
@@ -91,6 +99,11 @@ namespace TwitterAway.Twitter
             return statuses;
         }
 
+        /// <summary>
+        /// Stream内のXMLをステータス情報にパージングする
+        /// </summary>
+        /// <param name="st">Stream</param>
+        /// <returns>ステータス情報</returns>
         private StatusInfomation[] PaeseStatuses(Stream st)
         {
             XmlTextReader reader = null;
@@ -158,6 +171,17 @@ namespace TwitterAway.Twitter
                             {
                                 user.Description = reader.ReadString();
                             } // End of description
+                            else if (reader.LocalName == "profile_image_url")
+                            {
+                                try
+                                {
+                                    user.ProfileImageUrl = new Uri(reader.ReadString());
+                                }
+                                catch (UriFormatException)
+                                {
+                                    ;
+                                }
+                            } // End of profile_image_url
                             else if (reader.LocalName == "url")
                             {
                                 try
@@ -234,6 +258,10 @@ namespace TwitterAway.Twitter
             return (StatusInfomation[])statuses.ToArray(typeof(StatusInfomation));
         }
 
+        /// <summary>
+        /// メッセージをUpdateする
+        /// </summary>
+        /// <param name="message">メッセージ</param>
         public void Update(string message)
         {
             string sendMessage = string.Empty;

@@ -105,6 +105,17 @@ namespace TwitterAway.Twitter
             this.protectedMyUpdate = protectedMyUpdate;
         }
 
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="name"></param>
+        /// <param name="screenName"></param>
+        /// <param name="location"></param>
+        /// <param name="description"></param>
+        /// <param name="profileImageUrl"></param>
+        /// <param name="url"></param>
+        /// <param name="protectedMyUpdate"></param>
         public UserInfomation(string id, string name, string screenName, string location, string description, string profileImageUrl, string url, bool protectedMyUpdate)
         {
             this.id = id;
