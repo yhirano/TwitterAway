@@ -42,7 +42,7 @@ namespace TwitterAway
         /// <summary>
         /// ’˜ìŒ î•ñ
         /// </summary>
-        private const string COPYRIGHT = "Copyright (C) 2007 Uraroji";
+        private const string COPYRIGHT = "Copyright (C) 2007 Y.Hirano";
 
         /// <summary>
         /// ’˜ìŒ î•ñ

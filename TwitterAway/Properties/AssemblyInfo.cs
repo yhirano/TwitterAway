@@ -12,7 +12,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("TwitterAway")]
-[assembly: AssemblyCopyright("Copyright (C) 2007 Uraroji")]
+[assembly: AssemblyCopyright("Copyright (C) 2007 Y.Hirano")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: Guid("fc7a6e68-5322-4f0f-910d-0da3c595be64")]
