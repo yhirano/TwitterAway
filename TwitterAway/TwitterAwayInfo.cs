@@ -29,7 +29,7 @@ namespace TwitterAway
         /// <summary>
         /// アプリケーションのバージョン
         /// </summary>
-        private const string VERSION_NUMBER = "0.5";
+        private const string VERSION_NUMBER = "0.6";
 
         /// <summary>
         /// アプリケーションのバージョン

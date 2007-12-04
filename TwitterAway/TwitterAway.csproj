@@ -17,6 +17,7 @@
     <TargetFrameworkVersion>v1.0</TargetFrameworkVersion>
     <FormFactorID>
     </FormFactorID>
+    <ApplicationIcon>TwitterAwayIcon.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -95,6 +96,9 @@
       <Project>{23406A68-A2E2-4A8F-8760-DFCA3B2D0236}</Project>
       <Name>MiscPocketCompactLibrary</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="TwitterAwayIcon.ico" />
   </ItemGroup>
   <Import Condition="'$(TargetFrameworkVersion)' == 'v1.0'" Project="$(MSBuildBinPath)\Microsoft.CompactFramework.CSharp.v1.targets" />
   <Import Condition="'$(TargetFrameworkVersion)' == 'v2.0'" Project="$(MSBuildBinPath)\Microsoft.CompactFramework.CSharp.targets" />
