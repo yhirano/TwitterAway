@@ -294,10 +294,11 @@ namespace TwitterAway
                 error.Append(ex.Message);
 
                 Exception innnerEx = ex.InnerException;
-                while (innnerEx.InnerException != null)
+                while (innnerEx != null)
                 {
                     error.Append(innnerEx.Message);
                     error.Append("\r\n");
+                    innnerEx = innnerEx.InnerException;
                 }
 
                 error.Append("\r\n");
