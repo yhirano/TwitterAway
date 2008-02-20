@@ -25,10 +25,15 @@ namespace TwitterAway
     /// </summary>
     public class MainForm : System.Windows.Forms.Form
     {
+        /// <summary>
+        /// ゲットしたTwiiterStates
+        /// </summary>
+        private Twitter.StatusInfomation[] twitterStatuses = null;
+
         private ListView twitterListView;
         private ColumnHeader screenNameColumnHeader;
         private ColumnHeader doingColumnHeader;
-        private TextBox doingTextBox;
+        private TextBox doingPostTextBox;
         private Button updateButton;
         private MenuItem menuMenuItem;
         private MenuItem versionInfoMenuItem;
@@ -55,7 +60,10 @@ namespace TwitterAway
         /// CheckTwitterUpdate()の動作排他処理のためのフラグ
         /// </summary>
         private bool checkTwitterUpdateNowFlag;
-        private ImageList profileImageList;
+        private ImageList profileSmallImageList;
+        private PictureBox twitterPictureBox;
+        private ImageList profileBigImageList;
+        private TextBox doingInfomationTextBox;
 
         /// <summary>
         /// アンカーコントロールのリスト
@@ -96,7 +104,8 @@ namespace TwitterAway
             this.screenNameColumnHeader = new System.Windows.Forms.ColumnHeader();
             this.doingColumnHeader = new System.Windows.Forms.ColumnHeader();
             this.dateColumnHeader = new System.Windows.Forms.ColumnHeader();
-            this.doingTextBox = new System.Windows.Forms.TextBox();
+            this.profileSmallImageList = new System.Windows.Forms.ImageList();
+            this.doingPostTextBox = new System.Windows.Forms.TextBox();
             this.doingContextMenu = new System.Windows.Forms.ContextMenu();
             this.cutDoingMenuItem = new System.Windows.Forms.MenuItem();
             this.copyDoingMenuItem = new System.Windows.Forms.MenuItem();
@@ -104,7 +113,9 @@ namespace TwitterAway
             this.updateButton = new System.Windows.Forms.Button();
             this.inputPanel = new Microsoft.WindowsCE.Forms.InputPanel();
             this.updateCheckTimer = new System.Windows.Forms.Timer();
-            this.profileImageList = new System.Windows.Forms.ImageList();
+            this.twitterPictureBox = new System.Windows.Forms.PictureBox();
+            this.profileBigImageList = new System.Windows.Forms.ImageList();
+            this.doingInfomationTextBox = new System.Windows.Forms.TextBox();
             // 
             // mainMenu
             // 
@@ -164,10 +175,11 @@ namespace TwitterAway
             this.twitterListView.Columns.Add(this.screenNameColumnHeader);
             this.twitterListView.Columns.Add(this.doingColumnHeader);
             this.twitterListView.Columns.Add(this.dateColumnHeader);
-            this.twitterListView.Location = new System.Drawing.Point(3, 3);
-            this.twitterListView.Size = new System.Drawing.Size(234, 235);
-            this.twitterListView.SmallImageList = this.profileImageList;
+            this.twitterListView.Location = new System.Drawing.Point(3, 64);
+            this.twitterListView.Size = new System.Drawing.Size(234, 174);
+            this.twitterListView.SmallImageList = this.profileSmallImageList;
             this.twitterListView.View = System.Windows.Forms.View.Details;
+            this.twitterListView.SelectedIndexChanged += new System.EventHandler(this.twitterListView_SelectedIndexChanged);
             // 
             // screenNameColumnHeader
             // 
@@ -184,14 +196,18 @@ namespace TwitterAway
             this.dateColumnHeader.Text = "Date";
             this.dateColumnHeader.Width = 50;
             // 
-            // doingTextBox
+            // profileSmallImageList
             // 
-            this.doingTextBox.ContextMenu = this.doingContextMenu;
-            this.doingTextBox.Location = new System.Drawing.Point(3, 244);
-            this.doingTextBox.Size = new System.Drawing.Size(164, 21);
-            this.doingTextBox.KeyUp += new System.Windows.Forms.KeyEventHandler(this.doingTextBox_KeyUp);
-            this.doingTextBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.doingTextBox_KeyPress);
-            this.doingTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.doingTextBox_KeyDown);
+            this.profileSmallImageList.ImageSize = new System.Drawing.Size(16, 16);
+            // 
+            // doingPostTextBox
+            // 
+            this.doingPostTextBox.ContextMenu = this.doingContextMenu;
+            this.doingPostTextBox.Location = new System.Drawing.Point(3, 244);
+            this.doingPostTextBox.Size = new System.Drawing.Size(164, 21);
+            this.doingPostTextBox.KeyUp += new System.Windows.Forms.KeyEventHandler(this.doingTextBox_KeyUp);
+            this.doingPostTextBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.doingTextBox_KeyPress);
+            this.doingPostTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.doingTextBox_KeyDown);
             // 
             // doingContextMenu
             // 
@@ -229,15 +245,31 @@ namespace TwitterAway
             // 
             this.updateCheckTimer.Tick += new System.EventHandler(this.updateCheckTimer_Tick);
             // 
-            // profileImageList
+            // twitterPictureBox
             // 
-            this.profileImageList.ImageSize = new System.Drawing.Size(16, 16);
+            this.twitterPictureBox.Location = new System.Drawing.Point(3, 8);
+            this.twitterPictureBox.Size = new System.Drawing.Size(44, 44);
+            // 
+            // profileBigImageList
+            // 
+            this.profileBigImageList.ImageSize = new System.Drawing.Size(44, 44);
+            // 
+            // doingInfomationTextBox
+            // 
+            this.doingInfomationTextBox.ForeColor = System.Drawing.SystemColors.Window;
+            this.doingInfomationTextBox.Location = new System.Drawing.Point(53, 3);
+            this.doingInfomationTextBox.Multiline = true;
+            this.doingInfomationTextBox.ReadOnly = true;
+            this.doingInfomationTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.doingInfomationTextBox.Size = new System.Drawing.Size(184, 55);
             // 
             // MainForm
             // 
             this.ClientSize = new System.Drawing.Size(240, 268);
+            this.Controls.Add(this.doingInfomationTextBox);
+            this.Controls.Add(this.twitterPictureBox);
             this.Controls.Add(this.updateButton);
-            this.Controls.Add(this.doingTextBox);
+            this.Controls.Add(this.doingPostTextBox);
             this.Controls.Add(this.twitterListView);
             this.Menu = this.mainMenu;
             this.Text = "TwitterAway";
@@ -320,8 +352,10 @@ namespace TwitterAway
         /// </summary>
         private void SetAnchorControl()
         {
+            anchorControlList.Add(new AnchorLayout(twitterPictureBox, AnchorStyles.Top | AnchorStyles.Left, TwitterAwayInfo.FormBaseWidth, TwitterAwayInfo.FormBaseHight));
+            anchorControlList.Add(new AnchorLayout(doingInfomationTextBox, AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right, TwitterAwayInfo.FormBaseWidth, TwitterAwayInfo.FormBaseHight));
             anchorControlList.Add(new AnchorLayout(twitterListView, AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom, TwitterAwayInfo.FormBaseWidth, TwitterAwayInfo.FormBaseHight));
-            anchorControlList.Add(new AnchorLayout(doingTextBox, AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom, TwitterAwayInfo.FormBaseWidth, TwitterAwayInfo.FormBaseHight));
+            anchorControlList.Add(new AnchorLayout(doingPostTextBox, AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom, TwitterAwayInfo.FormBaseWidth, TwitterAwayInfo.FormBaseHight));
             anchorControlList.Add(new AnchorLayout(updateButton, AnchorStyles.Right | AnchorStyles.Bottom, TwitterAwayInfo.FormBaseWidth, TwitterAwayInfo.FormBaseHight));
         }
 
@@ -332,7 +366,7 @@ namespace TwitterAway
         {
             // コントロールを一端消す
             twitterListView.Visible = false;
-            doingTextBox.Visible = false;
+            doingPostTextBox.Visible = false;
             updateButton.Visible = false;
 
             foreach (AnchorLayout anchorLayout in anchorControlList)
@@ -342,7 +376,7 @@ namespace TwitterAway
 
             // コントロールを出現させる
             twitterListView.Visible = true;
-            doingTextBox.Visible = true;
+            doingPostTextBox.Visible = true;
             updateButton.Visible = true;
         }
 
@@ -355,7 +389,7 @@ namespace TwitterAway
         {
             // コントロールを一端消す
             twitterListView.Visible = false;
-            doingTextBox.Visible = false;
+            doingPostTextBox.Visible = false;
             updateButton.Visible = false;
 
             foreach (AnchorLayout anchorLayout in anchorControlList)
@@ -365,7 +399,7 @@ namespace TwitterAway
 
             // コントロールを出現させる
             twitterListView.Visible = true;
-            doingTextBox.Visible = true;
+            doingPostTextBox.Visible = true;
             updateButton.Visible = true;
         }
 
@@ -405,14 +439,14 @@ namespace TwitterAway
             Twitter.Twitter twitterAccount = new TwitterAway.Twitter.Twitter(UserSetting.UserName, UserSetting.Password);
             try
             {
-                if (post == false || doingTextBox.Text == string.Empty)
+                if (post == false || doingPostTextBox.Text == string.Empty)
                 {
                     UpdateTwitterListView(twitterAccount);
                 }
                 else
                 {
-                    twitterAccount.Update(doingTextBox.Text);
-                    doingTextBox.Text = string.Empty;
+                    twitterAccount.Update(doingPostTextBox.Text);
+                    doingPostTextBox.Text = string.Empty;
                     UpdateTwitterListView(twitterAccount);
                 }
             }
@@ -462,18 +496,18 @@ namespace TwitterAway
             twitterListView.Items.Clear();
             twitterListView.BeginUpdate();
 
-            Twitter.StatusInfomation[] statuses = null;
+            twitterStatuses = null;
 
             if (UserSetting.CheckList == UserSetting.CheckLists.Friends)
             {
-                statuses = twitterAccount.FriendTimeline();
+                twitterStatuses = twitterAccount.FriendTimeline();
             }
             else if (UserSetting.CheckList == UserSetting.CheckLists.Public)
             {
-                statuses = twitterAccount.PublicTimeline();
+                twitterStatuses = twitterAccount.PublicTimeline();
             }
 
-            foreach (Twitter.StatusInfomation statusInfomation in statuses)
+            foreach (Twitter.StatusInfomation statusInfomation in twitterStatuses)
             {
                 string date = string.Empty;
                 if (DateTime.Today <= statusInfomation.CreatedAt)
@@ -497,7 +531,7 @@ namespace TwitterAway
 
             twitterListView.EndUpdate();
 
-            if (statuses.Length == 0)
+            if (twitterStatuses.Length == 0)
             {
                 MessageBox.Show("ステータスがありません。", "情報");
             }
@@ -532,15 +566,17 @@ namespace TwitterAway
                 {
                     st = TwitterAwayUtility.GetWebStream(profileImageUrl);
                     image = new Bitmap(st);
-                    profileImageList.Images.Add(image);
-                    value = profileImageList.Images.Count - 1;
+                    profileSmallImageList.Images.Add(image);
+                    profileBigImageList.Images.Add(image);
+                    value = profileSmallImageList.Images.Count - 1;
                     profileIndexHashTable[profileImageUrl] = value;
                 }
                 catch
                 {
-                    if (image != null)
+                    if (image != null && value != -1)
                     {
-                        profileImageList.Images.RemoveAt(profileImageList.Images.Count - 1);
+                        profileSmallImageList.Images.RemoveAt(profileSmallImageList.Images.Count - 1);
+                        profileBigImageList.Images.RemoveAt(profileSmallImageList.Images.Count - 1);
                     }
                     value = -1;
                     profileIndexHashTable[profileImageUrl] = value;
@@ -695,17 +731,17 @@ namespace TwitterAway
 
         private void cutDoingMenuItem_Click(object sender, EventArgs e)
         {
-            ClipboardTextBox.Cut(doingTextBox);
+            ClipboardTextBox.Cut(doingPostTextBox);
         }
 
         private void copyDoingMenuItem_Click(object sender, EventArgs e)
         {
-            ClipboardTextBox.Copy(doingTextBox);
+            ClipboardTextBox.Copy(doingPostTextBox);
         }
 
         private void pasteDoingMenuItem_Click(object sender, EventArgs e)
         {
-            ClipboardTextBox.Paste(doingTextBox);
+            ClipboardTextBox.Paste(doingPostTextBox);
         }
 
         private void doingTextBox_KeyDown(object sender, KeyEventArgs e)
@@ -718,12 +754,12 @@ namespace TwitterAway
             // 切り取りショートカット
             else if (e.KeyCode == Keys.X && e.Control)
             {
-                ClipboardTextBox.Cut(doingTextBox);
+                ClipboardTextBox.Cut(doingPostTextBox);
             }
             // 貼り付けショートカット
             else if (e.KeyCode == Keys.V && e.Control)
             {
-                ClipboardTextBox.Paste(doingTextBox);
+                ClipboardTextBox.Paste(doingPostTextBox);
             }
         }
 
@@ -741,7 +777,7 @@ namespace TwitterAway
             // コピーショートカット
             if (e.KeyCode == Keys.C && e.Control)
             {
-                ClipboardTextBox.Copy(doingTextBox);
+                ClipboardTextBox.Copy(doingPostTextBox);
             }
         }
 
@@ -778,6 +814,30 @@ namespace TwitterAway
         {
             UpdateTimerIntervalChange(UserSetting.UpdateTimerMillSecond);
         }
+
+        private void twitterListView_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            // リストビューに選択がある場合
+            if (twitterListView.SelectedIndices.Count == 1 && twitterListView.SelectedIndices[0] < twitterStatuses.Length)
+            {
+                Twitter.StatusInfomation status = twitterStatuses[twitterListView.SelectedIndices[0]];
+                doingInfomationTextBox.Text = status.User.Name + "\r\n" + status.Text;
+
+                if (profileIndexHashTable.ContainsKey(status.User.ProfileImageUrl) == true && (int)profileIndexHashTable[status.User.ProfileImageUrl] < profileBigImageList.Images.Count)
+                {
+                    twitterPictureBox.Image = (Image)profileBigImageList.Images[(int)profileIndexHashTable[status.User.ProfileImageUrl]];
+                }
+                else
+                {
+                    twitterPictureBox.Image = null;
+                }
+            }
+            // リストビューに選択がない場合
+            else
+            {
+                doingInfomationTextBox.Text = string.Empty;
+                twitterPictureBox.Image = null;
+            }
+        }
     }
 }
-

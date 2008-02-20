@@ -29,7 +29,7 @@ namespace TwitterAway
         /// <summary>
         /// アプリケーションのバージョン
         /// </summary>
-        private const string VERSION_NUMBER = "0.6";
+        private const string VERSION_NUMBER = "0.7 TestRelease1";
 
         /// <summary>
         /// アプリケーションのバージョン
@@ -42,7 +42,7 @@ namespace TwitterAway
         /// <summary>
         /// 著作権情報
         /// </summary>
-        private const string COPYRIGHT = "Copyright (C) 2007 Y.Hirano";
+        private const string COPYRIGHT = "Copyright (C) 2007-2008 Y.Hirano";
 
         /// <summary>
         /// 著作権情報
